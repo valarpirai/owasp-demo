@@ -98,9 +98,9 @@ public class XssHandler implements IRouteHandler {
             {"DOM manipulation", "<img src=x onerror=\"document.body.style.background='red'\">",
              "Uses an invalid src to trigger onerror, then alters the page DOM.", "comment",
              "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'comment=<img src=x onerror=alert(1)>'"},
-            {"Stored payload", "<script>fetch('/logout')</script>",
-             "Silently logs out any visitor who views the comment — a stored XSS action.", "comment",
-             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>fetch('/logout')</script>\""},
+            {"Stored payload", "<script>document.title='Hacked by XSS'</script>",
+             "Runs as the victim and changes the tab title. A stored script can do anything the user can do. The session stays alive.", "comment",
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>document.title='Hacked by XSS'</script>\""},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("xss.badge.id"), Messages.get("xss.badge.name"), Messages.get("xss.badge.tag")) + info + exploits + panels;
