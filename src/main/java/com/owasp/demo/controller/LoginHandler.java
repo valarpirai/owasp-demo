@@ -1,6 +1,5 @@
 package com.owasp.demo.controller;
 
-import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.model.User;
 import com.owasp.demo.repository.UserRepository;
 import com.owasp.demo.view.TemplateEngine;
@@ -18,7 +17,7 @@ public class LoginHandler implements IRouteHandler {
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
 
         if ("GET".equals(req.getMethod()) && "/logout".equals(path)) {
             HttpSession session = req.getSession(false);
@@ -55,15 +54,12 @@ public class LoginHandler implements IRouteHandler {
     }
 
     private void renderLogin(HttpServletResponse res, String error) throws IOException {
-        AppConfig cfg = AppConfig.get();
         String errorHtml = error != null
             ? "<div class=\"mb-4 p-3 bg-red-100 text-red-700 rounded text-sm\">%s</div>".formatted(error)
             : "";
 
         String content = TemplateEngine.render("login.html", Map.of(
-            "error", errorHtml,
-            "hint_user", cfg.getAdminUsername(),
-            "hint_pass", cfg.getAdminPassword()
+            "error", errorHtml
         ));
 
         res.getWriter().write(TemplateEngine.page("Login", content, false));

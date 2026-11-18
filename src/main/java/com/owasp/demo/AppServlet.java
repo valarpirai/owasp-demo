@@ -76,13 +76,24 @@ public class AppServlet extends HttpServlet {
         routes.put("GET /ssrf", ssrf);
         routes.put("POST /ssrf/vulnerable", ssrf);
         routes.put("POST /ssrf/mitigated", ssrf);
+
+        RceHandler rce = new RceHandler();
+        routes.put("GET /rce", rce);
+        routes.put("POST /rce/vulnerable", rce);
+        routes.put("POST /rce/mitigated", rce);
+
+        DbBrowserHandler dbBrowser = new DbBrowserHandler();
+        routes.put("GET /db-browser", dbBrowser);
+        routes.put("GET /db-browser/table", dbBrowser);
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("text/html;charset=UTF-8");
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("X-Frame-Options", "DENY");
 
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
         if (path == null || path.isEmpty()) path = "/";
 
         if (!PUBLIC_PATHS.contains(path)) {

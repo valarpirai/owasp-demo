@@ -79,6 +79,66 @@ public class TemplateEngine {
             """.formatted(border, header, label, formHtml, resultHtml);
     }
 
+    /**
+     * Renders a "Try These Payloads" box.
+     * Each entry is String[]{title, payload, description} or String[]{title, payload, description, inputName}.
+     * When inputName is supplied a "Use" button fills that form input with the payload.
+     */
+    public static String exploitBox(String[][] examples) {
+        StringBuilder items = new StringBuilder();
+        for (String[] ex : examples) {
+            String title     = ex[0];
+            String payload   = ex[1];
+            String desc      = ex[2];
+            String inputName = ex.length > 3 ? ex[3] : null;
+            String curlCmd   = ex.length > 4 ? ex[4] : null;
+
+            String useBtn = inputName != null
+                ? ("<button type='button' onclick=\"document.querySelector('[name=%s]').value='%s'\" "
+                  + "class='shrink-0 text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded'>Use ↗</button>")
+                  .formatted(inputName, jsEscape(payload))
+                : "";
+
+            String curlBtn = curlCmd != null
+                ? ("<button type='button' onclick=\"navigator.clipboard.writeText('%s')\" "
+                  + "class='shrink-0 text-xs border border-gray-300 bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded font-mono'>curl</button>")
+                  .formatted(jsEscape(curlCmd))
+                : "";
+
+            items.append("""
+                <div class="flex items-start gap-3 bg-white rounded p-3 border border-yellow-100">
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium text-sm text-gray-800">%s</div>
+                    <code class="text-xs bg-gray-100 text-red-700 px-1.5 py-0.5 rounded mt-1 block break-all">%s</code>
+                    <p class="text-xs text-gray-500 mt-1">%s</p>
+                  </div>
+                  <button type='button' onclick="navigator.clipboard.writeText('%s')"
+                    class="shrink-0 text-xs border border-gray-300 hover:bg-gray-100 px-2 py-1 rounded">Copy</button>
+                  %s
+                  %s
+                </div>
+                """.formatted(escape(title), escape(payload), desc, jsEscape(payload), useBtn, curlBtn));
+        }
+
+        return """
+            <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <h3 class="font-semibold text-yellow-800 mb-3 text-sm">⚡ Exploit Payloads — Try These</h3>
+              <div class="grid gap-2">%s</div>
+            </div>
+            """.formatted(items);
+    }
+
+    private static String jsEscape(String input) {
+        if (input == null) return "";
+        return input
+            .replace("\\", "\\\\")
+            .replace("'", "\\'")
+            .replace("<", "\\x3C")
+            .replace(">", "\\x3E")
+            .replace("\n", "\\n")
+            .replace("\r", "");
+    }
+
     public static String resultBox(String result, boolean success) {
         if (result == null || result.isBlank()) return "";
         String cls = success

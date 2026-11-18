@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8090
 
 database:
   url: jdbc:h2:mem:owaspdb;DB_CLOSE_DELAY=-1
@@ -29,3 +29,6 @@ auth:
 
 otp:
   max_attempts: 5
+
+integrity:
+  hmac_secret: "change-me-in-production-use-32-chars-min"

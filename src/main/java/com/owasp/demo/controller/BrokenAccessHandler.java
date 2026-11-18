@@ -16,7 +16,7 @@ public class BrokenAccessHandler implements IRouteHandler {
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
 
         if ("/bac/vulnerable".equals(path)) {
             handleVulnerable(req, res);
@@ -116,7 +116,22 @@ public class BrokenAccessHandler implements IRouteHandler {
                 TemplateEngine.demoPanel("Mitigated — Role Enforced", "green", safeBtn, "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control") + info + panels;
+        String exploits = TemplateEngine.exploitBox(new String[][]{
+            {"Direct object access", "GET /bac/vulnerable",
+             "Visit this URL as any logged-in user (even role=USER) to dump all user records including passwords.",
+             null,
+             "curl -s http://localhost:8090/bac/vulnerable -b 'JSESSIONID=SESSION'"},
+            {"IDOR — change user ID", "GET /bac/vulnerable?id=1",
+             "Predictable IDs let an attacker enumerate records by incrementing the id parameter.",
+             null,
+             "curl -s 'http://localhost:8090/bac/vulnerable?id=1' -b 'JSESSIONID=SESSION'"},
+            {"Role parameter tampering", "POST /bac/mitigated  body: role=ADMIN",
+             "Sending a forged role in the request body bypasses client-enforced role checks.",
+             null,
+             "curl -s -X POST http://localhost:8090/bac/mitigated -b 'JSESSIONID=SESSION' -d 'role=ADMIN'"},
+        });
+
+        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Broken Access Control", content, true));
     }
 }

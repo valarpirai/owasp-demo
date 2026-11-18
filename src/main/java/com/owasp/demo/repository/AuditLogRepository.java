@@ -13,6 +13,7 @@ import java.util.List;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
+
 public class AuditLogRepository {
 
     public void log(String event, String details) throws SQLException {
@@ -32,10 +33,10 @@ public class AuditLogRepository {
             .fetch();
 
         return result.map(r -> new AuditLog(
-            r.getValue(field("id", Integer.class)),
-            r.getValue(field("event_time", Timestamp.class)).toLocalDateTime(),
-            r.getValue(field("event", String.class)),
-            r.getValue(field("details", String.class))
+            r.get(0, Integer.class),
+            r.get(1, Timestamp.class).toLocalDateTime(),
+            r.get(2, String.class),
+            r.get(3, String.class)
         ));
     }
 }

@@ -5,8 +5,6 @@ import com.owasp.demo.model.User;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.jooq.impl.DSL;
-
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -52,10 +50,10 @@ public class UserRepository {
 
     private User map(Record r) {
         return new User(
-            r.getValue(field("id", Integer.class)),
-            r.getValue(field("username", String.class)),
-            r.getValue(field("password", String.class)),
-            r.getValue(field("role", String.class))
+            r.get(0, Integer.class),
+            r.get(1, String.class),
+            r.get(2, String.class),
+            r.get(3, String.class)
         );
     }
 }

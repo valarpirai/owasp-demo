@@ -25,6 +25,7 @@ public class AppConfig {
     private final int maxFailedAttempts;
     private final int lockoutMinutes;
     private final int otpMaxAttempts;
+    private final String hmacSecret;
 
     @SuppressWarnings("unchecked")
     private AppConfig() {
@@ -54,7 +55,7 @@ public class AppConfig {
         seedPassword = (String) user.get("password");
         seedRole = (String) user.get("role");
 
-        ssrfAllowlist = (List<String>) cfg.get("ssrf") != null
+        ssrfAllowlist = cfg.get("ssrf") != null
             ? (List<String>) ((Map<String, Object>) cfg.get("ssrf")).get("allowlist")
             : List.of();
 
@@ -64,6 +65,9 @@ public class AppConfig {
 
         Map<String, Object> otp = (Map<String, Object>) cfg.get("otp");
         otpMaxAttempts = (int) otp.get("max_attempts");
+
+        Map<String, Object> integrity = (Map<String, Object>) cfg.get("integrity");
+        hmacSecret = (String) integrity.get("hmac_secret");
     }
 
     public static AppConfig get() { return INSTANCE; }
@@ -83,4 +87,5 @@ public class AppConfig {
     public int getMaxFailedAttempts() { return maxFailedAttempts; }
     public int getLockoutMinutes()    { return lockoutMinutes; }
     public int getOtpMaxAttempts()    { return otpMaxAttempts; }
+    public String getHmacSecret()     { return hmacSecret; }
 }

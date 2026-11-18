@@ -15,7 +15,7 @@ public class Main {
 
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(cfg.getServerPort());
-        tomcat.getConnector();
+        tomcat.getConnector().setProperty("address", "127.0.0.1");
 
         Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
         Tomcat.addServlet(ctx, "appServlet", new AppServlet());

@@ -10,7 +10,7 @@ public class SecurityMisconfigHandler implements IRouteHandler {
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
 
         if ("/misconfig/vulnerable".equals(path)) {
             handleVulnerable(req, res);
@@ -79,7 +79,22 @@ public class SecurityMisconfigHandler implements IRouteHandler {
                 TemplateEngine.demoPanel("Mitigated — Generic Error Page", "green", safeBtn, "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A05", "Security Misconfiguration") + info + panels;
+        String exploits = TemplateEngine.exploitBox(new String[][]{
+            {"Trigger verbose error", "GET /misconfig/vulnerable",
+             "Click the vulnerable button — the response leaks DB URL, class names, and full stack trace.",
+             null,
+             "curl -s http://localhost:8090/misconfig/vulnerable -b 'JSESSIONID=SESSION'"},
+            {"H2 console access", "GET /h2-console",
+             "Many Spring Boot apps expose the H2 web console in production. Try browsing to /h2-console directly.",
+             null,
+             "curl -s http://localhost:8090/h2-console -b 'JSESSIONID=SESSION' -I"},
+            {"Default credentials", "sa / (empty password)",
+             "H2's default SA user has no password. Combined with an exposed console, full DB access is trivial.",
+             null,
+             "curl -s http://localhost:8090/h2-console/login.do -X POST -d 'url=jdbc:h2:mem:owaspdb&user=sa&password='"},
+        });
+
+        String content = TemplateEngine.vulnerabilityBadge("A05", "Security Misconfiguration") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Security Misconfiguration", content, true));
     }
 }

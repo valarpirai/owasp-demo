@@ -19,9 +19,17 @@
         Sign In
       </button>
     </form>
-    <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-gray-600">
-      <strong>Demo credentials:</strong><br/>
-      Username: <code>{hint_user}</code> &nbsp; Password: <code>{hint_pass}</code>
+    <div class="mt-4 flex gap-2">
+      <button type="button"
+        onclick="document.querySelector('[name=username]').value='admin';document.querySelector('[name=password]').value='admin123'"
+        class="flex-1 border border-gray-300 rounded py-1.5 text-xs text-gray-600 hover:bg-gray-50">
+        Login as admin
+      </button>
+      <button type="button"
+        onclick="document.querySelector('[name=username]').value='user';document.querySelector('[name=password]').value='user123'"
+        class="flex-1 border border-gray-300 rounded py-1.5 text-xs text-gray-600 hover:bg-gray-50">
+        Login as user
+      </button>
     </div>
   </div>
 </div>

@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,11 +13,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class DataIntegrityHandler implements IRouteHandler {
 
-    private static final String HMAC_SECRET = "super-secret-hmac-key-not-in-prod";
+    private static final String HMAC_SECRET = AppConfig.get().getHmacSecret();
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
 
         if ("POST".equals(req.getMethod()) && "/integrity/vulnerable".equals(path)) {
             handleVulnerable(req, res);
@@ -130,7 +131,19 @@ public class DataIntegrityHandler implements IRouteHandler {
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A08", "Software & Data Integrity Failures") + info + panels;
+        String exploits = TemplateEngine.exploitBox(new String[][]{
+            {"Forge admin role", "eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9",
+             "Base64 of {\"user\":\"evil\",\"role\":\"ADMIN\"}. Paste this in the vulnerable panel — no signature needed.", "payload",
+             "curl -s -X POST http://localhost:8090/integrity/vulnerable -b 'JSESSIONID=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9'"},
+            {"Modify existing payload", sample,
+             "Copy the pre-filled payload, decode it, change user to 'hacker', re-encode, and submit — server accepts it.", "payload",
+             "echo '{\"user\":\"hacker\",\"role\":\"ADMIN\"}' | base64 | xargs -I{} curl -s -X POST http://localhost:8090/integrity/vulnerable -b 'JSESSIONID=SESSION' -d 'payload={}'"},
+            {"Tamper signed payload", sample,
+             "Use the same payload in the mitigated panel but leave the original signature — it will be rejected.", "payload2",
+             "curl -s -X POST http://localhost:8090/integrity/mitigated -b 'JSESSIONID=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9&sig=invalidsignature'"},
+        });
+
+        String content = TemplateEngine.vulnerabilityBadge("A08", "Software & Data Integrity Failures") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Data Integrity Failures", content, true));
     }
 }

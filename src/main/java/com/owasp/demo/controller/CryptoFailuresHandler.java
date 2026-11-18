@@ -15,7 +15,7 @@ public class CryptoFailuresHandler implements IRouteHandler {
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getServletPath();
+        String path = req.getPathInfo();
 
         if ("POST".equals(req.getMethod()) && "/crypto/vulnerable".equals(path)) {
             handleVulnerable(req, res);
@@ -110,7 +110,19 @@ public class CryptoFailuresHandler implements IRouteHandler {
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A02", "Cryptographic Failures") + info + panels;
+        String exploits = TemplateEngine.exploitBox(new String[][]{
+            {"Common password", "password123",
+             "Hash it here then search CrackStation.net — the MD5 result reverses instantly from rainbow tables.", "password",
+             "curl -s -X POST http://localhost:8090/crypto/vulnerable -b 'JSESSIONID=SESSION' -d 'password=password123'"},
+            {"Admin password", "admin123",
+             "This app's seed password. Its MD5 hash (0192023a7bbd73250516f069df18b500) is in every rainbow table.", "password",
+             "curl -s -X POST http://localhost:8090/crypto/vulnerable -b 'JSESSIONID=SESSION' -d 'password=admin123'"},
+            {"Empty password", "",
+             "MD5 of an empty string (d41d8cd98f00b204e9800998ecf8427e) is well-known. bcrypt handles this safely.", "password",
+             "curl -s -X POST http://localhost:8090/crypto/vulnerable -b 'JSESSIONID=SESSION' -d 'password='"},
+        });
+
+        String content = TemplateEngine.vulnerabilityBadge("A02", "Cryptographic Failures") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Cryptographic Failures", content, true));
     }
 }
