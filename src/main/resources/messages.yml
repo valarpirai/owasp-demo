@@ -60,7 +60,7 @@ xss:
     mitigated: "Mitigated — HTML Encoding"
 rce:
   info:
-    explanation: "User input is concatenated into a shell command string and passed to <code>sh -c</code>. An attacker appends <code>; ls</code> or <code>&& cat /etc/passwd</code> to run arbitrary OS commands with the server's privileges."
+    explanation: "User input is concatenated into a shell command string and passed to <code>sh -c</code>. An attacker appends <code>; ls</code> or <code>&& cat /etc/passwd</code> to run arbitrary OS commands with the server's privileges. This demo runs only <code>ls</code> after a demo host. Every other injected command is refused."
     mitigation: "Never pass user input to a shell. Use <code>ProcessBuilder</code> with a pre-split argument array — each argument is a separate element, so no shell interpretation occurs. Validate the input against a strict allowlist regex before use."
   badge:
     id: "A03"

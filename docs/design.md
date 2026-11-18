@@ -145,7 +145,7 @@ Four tables: `users`, `products`, `audit_log`, `sessions`. `Database.init()` cre
 | 8  | A08 | Data Integrity Failures       | Accepts any Base64 payload          | Rejects payload with bad HMAC       |
 | 9  | A09 | Logging Failures              | Failed login silent                 | Failed login in audit_log           |
 | 10 | A10 | SSRF                          | Fetches any URL (safety guard for private IPs) | Allowlist by parsed origin |
-| 11 | A03 | OS Command Injection (RCE)    | sh -c string concat (demo hosts only) | ProcessBuilder + regex allowlist |
+| 11 | A03 | OS Command Injection (RCE)    | sh -c string concat (demo host + ls only) | ProcessBuilder + regex allowlist |
 | 12 | A01 | CSRF                          | Email change on cookie alone        | Per-session token, 403 without it   |
 
 ---
@@ -160,7 +160,7 @@ The app is a local-only playground. Three layers keep it from causing real harm:
 | SSRF pre-flight | `SsrfHandler.demoSafetyBlock()` | Blocks `file://`, loopback, link-local (169.254.x.x), and private IP ranges. Shows a simulation message instead of fetching. |
 | SSRF allowlist origin check | `SsrfHandler.isHostAllowed()` | Parses the URL and compares scheme+host+port. Prevents `startsWith` bypass via subdomain spoofing. |
 | RCE host allowlist | `RceHandler` | Only `localhost`, `example.com`, `127.0.0.1` run a real `ping`. Other valid hostnames show the constructed command without executing it. |
-| Shell injection guard | `RceHandler` | Any input that fails the `[a-zA-Z0-9._-]` regex shows `INJECTION DETECTED` and the constructed command, not executed. |
+| Shell injection guard | `RceHandler` | The vulnerable side runs a real `sh -c` only for a demo host followed by `ls` commands, such as `localhost; ls -la`. Any other injected command, `$(…)`, backtick, redirect or non-demo host shows `INJECTION BLOCKED` and the constructed command, not executed. Patterns live under `rce` in `application.yml`. |
 | HMAC secret in config | `application.yml` | Secret lives outside source. Change it before any shared deployment. |
 | Security headers | `RouteInterceptor` | Headers from `security.headers` in `application.yml`. Default: `nosniff` and `X-Frame-Options: DENY`. |
 

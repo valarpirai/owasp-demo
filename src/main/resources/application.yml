@@ -21,6 +21,8 @@ csrf:
 
 rce:
   safe_host_pattern: "^[a-zA-Z0-9._-]{1,253}$"
+  separator_pattern: "\\s*(?:;|&&|\\|\\||\\||&)\\s*"
+  allowed_command_pattern: "ls(?: [A-Za-z0-9._/-]+)*"
   demo_hosts:
     - localhost
     - example.com

