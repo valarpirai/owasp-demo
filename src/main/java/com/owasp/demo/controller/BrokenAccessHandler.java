@@ -1,0 +1,122 @@
+package com.owasp.demo.controller;
+
+import com.owasp.demo.model.User;
+import com.owasp.demo.repository.UserRepository;
+import com.owasp.demo.view.TemplateEngine;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+import java.util.List;
+
+public class BrokenAccessHandler implements IRouteHandler {
+
+    private final UserRepository userRepository = new UserRepository();
+
+    @Override
+    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String path = req.getServletPath();
+
+        if ("/bac/vulnerable".equals(path)) {
+            handleVulnerable(req, res);
+        } else if ("/bac/mitigated".equals(path)) {
+            handleMitigated(req, res);
+        } else {
+            renderPage(res, null, null);
+        }
+    }
+
+    private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String result;
+        try {
+            List<User> users = userRepository.findAll();
+            StringBuilder sb = new StringBuilder();
+            sb.append("<table class='w-full text-sm border-collapse'>");
+            sb.append("<tr class='bg-gray-100'><th class='border px-2 py-1'>ID</th><th class='border px-2 py-1'>Username</th><th class='border px-2 py-1 text-red-600'>Password</th><th class='border px-2 py-1'>Role</th></tr>");
+            for (User u : users) {
+                sb.append("<tr>")
+                  .append("<td class='border px-2 py-1'>").append(u.id()).append("</td>")
+                  .append("<td class='border px-2 py-1'>").append(TemplateEngine.escape(u.username())).append("</td>")
+                  .append("<td class='border px-2 py-1 text-red-600'>").append(TemplateEngine.escape(u.password())).append("</td>")
+                  .append("<td class='border px-2 py-1'>").append(TemplateEngine.escape(u.role())).append("</td>")
+                  .append("</tr>");
+            }
+            sb.append("</table>");
+            result = sb.toString();
+        } catch (Exception e) {
+            result = "Error: " + TemplateEngine.escape(e.getMessage());
+        }
+        renderPage(res, result, null);
+    }
+
+    private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        HttpSession session = req.getSession(false);
+        String role = session != null ? (String) session.getAttribute("role") : null;
+
+        if (!"ADMIN".equals(role)) {
+            renderPage(res, null,
+                "<span class='text-red-600 font-semibold'>403 Forbidden — Admin role required. " +
+                "Your role: " + TemplateEngine.escape(role) + "</span>");
+            return;
+        }
+
+        String result;
+        try {
+            List<User> users = userRepository.findAll();
+            StringBuilder sb = new StringBuilder();
+            sb.append("<table class='w-full text-sm border-collapse'>");
+            sb.append("<tr class='bg-gray-100'><th class='border px-2 py-1'>ID</th><th class='border px-2 py-1'>Username</th><th class='border px-2 py-1'>Role</th></tr>");
+            for (User u : users) {
+                sb.append("<tr>")
+                  .append("<td class='border px-2 py-1'>").append(u.id()).append("</td>")
+                  .append("<td class='border px-2 py-1'>").append(TemplateEngine.escape(u.username())).append("</td>")
+                  .append("<td class='border px-2 py-1'>").append(TemplateEngine.escape(u.role())).append("</td>")
+                  .append("</tr>");
+            }
+            sb.append("</table>");
+            result = sb.toString();
+        } catch (Exception e) {
+            result = "Error: " + TemplateEngine.escape(e.getMessage());
+        }
+        renderPage(res, null, result);
+    }
+
+    private void renderPage(HttpServletResponse res, String vulnResult, String safeResult) throws IOException {
+        String info = TemplateEngine.infoBox(
+            "The admin endpoint returns all user data (including passwords) to any authenticated user, " +
+            "regardless of their role. Any logged-in user can access <code>/bac/vulnerable</code> and " +
+            "read sensitive records they should not see.",
+            "Enforce role-based access control on every sensitive endpoint. Check the user's role " +
+            "from the session on the server side — never trust the client to restrict access. " +
+            "Return HTTP 403 when the role check fails."
+        );
+
+        String vulnBtn = """
+            <a href="/bac/vulnerable"
+               class="inline-block bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">
+              Fetch Admin Data (No Role Check)
+            </a>
+            %s
+            """.formatted(vulnResult != null ? "<div class='mt-3'>" + vulnResult + "</div>" : "");
+
+        String safeBtn = """
+            <a href="/bac/mitigated"
+               class="inline-block bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
+              Fetch Admin Data (Role Check)
+            </a>
+            <p class="text-xs text-gray-500 mt-1">Logged in as admin → access granted. Log in as 'user' to see the 403.</p>
+            %s
+            """.formatted(safeResult != null ? "<div class='mt-3'>" + safeResult + "</div>" : "");
+
+        String panels = """
+            <div class="grid md:grid-cols-2 gap-6">%s%s</div>
+            """.formatted(
+                TemplateEngine.demoPanel("Vulnerable — No Role Check", "red", vulnBtn, ""),
+                TemplateEngine.demoPanel("Mitigated — Role Enforced", "green", safeBtn, "")
+            );
+
+        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control") + info + panels;
+        res.getWriter().write(TemplateEngine.page("Broken Access Control", content, true));
+    }
+}

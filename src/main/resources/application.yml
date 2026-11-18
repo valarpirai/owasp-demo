@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+database:
+  url: jdbc:h2:mem:owaspdb;DB_CLOSE_DELAY=-1
+  username: sa
+  password: ""
+
+app:
+  name: "OWASP Top 10 Demo"
+  seed:
+    admin:
+      username: admin
+      password: admin123
+      role: ADMIN
+    user:
+      username: user
+      password: user123
+      role: USER
+
+ssrf:
+  allowlist:
+    - "https://httpbin.org"
+    - "https://jsonplaceholder.typicode.com"
+
+auth:
+  max_failed_attempts: 3
+  lockout_minutes: 5
+
+otp:
+  max_attempts: 5
