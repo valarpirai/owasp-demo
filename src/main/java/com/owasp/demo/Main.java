@@ -20,6 +20,7 @@ public class Main {
 
         Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
         ctx.addApplicationListener(SessionCleanupListener.class.getName());
+        ctx.setSessionCookieName(cfg.getString("session.cookie_name"));
         ctx.setUseHttpOnly(true);
         ctx.setSessionTimeout(cfg.getInt("session.timeout_minutes"));
         Rfc6265CookieProcessor cookies = new Rfc6265CookieProcessor();

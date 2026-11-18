@@ -131,13 +131,13 @@ public class DataIntegrityHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Forge admin role", "eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9",
              "Base64 of {\"user\":\"evil\",\"role\":\"ADMIN\"}. Paste this in the vulnerable panel — no signature needed.", "payload",
-             "curl -s -X POST http://localhost:8090/integrity/vulnerable -b 'JSESSIONID=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9'"},
+             "curl -s -X POST http://localhost:8090/integrity/vulnerable -b 'SESSION_COOKIE=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9'"},
             {"Modify existing payload", sample,
              "Copy the pre-filled payload, decode it, change user to 'hacker', re-encode, and submit — server accepts it.", "payload",
-             "echo '{\"user\":\"hacker\",\"role\":\"ADMIN\"}' | base64 | xargs -I{} curl -s -X POST http://localhost:8090/integrity/vulnerable -b 'JSESSIONID=SESSION' -d 'payload={}'"},
+             "echo '{\"user\":\"hacker\",\"role\":\"ADMIN\"}' | base64 | xargs -I{} curl -s -X POST http://localhost:8090/integrity/vulnerable -b 'SESSION_COOKIE=SESSION' -d 'payload={}'"},
             {"Tamper signed payload", sample,
              "Use the same payload in the mitigated panel but leave the original signature — it will be rejected.", "payload2",
-             "curl -s -X POST http://localhost:8090/integrity/mitigated -b 'JSESSIONID=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9&sig=invalidsignature'"},
+             "curl -s -X POST http://localhost:8090/integrity/mitigated -b 'SESSION_COOKIE=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9&sig=invalidsignature'"},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("integrity.badge.id"), Messages.get("integrity.badge.name"), Messages.get("integrity.badge.tag")) + info + exploits + panels;

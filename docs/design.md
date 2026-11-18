@@ -117,7 +117,9 @@ On login the app:
 
 Tabs in one browser share the session cookie, so they share one session. Opening `/login` while logged in redirects to the dashboard.
 
-Tomcat sets the cookie `HttpOnly` and `SameSite=Lax`. Sessions end after `session.timeout_minutes` idle. The `Secure` flag is off because the app runs on plain HTTP.
+Tomcat names the cookie `OWASP_SID` (`session.cookie_name`), not `JSESSIONID`. It sets the cookie `HttpOnly` and `SameSite=Lax`. The curl lines in the exploit boxes use the same name. Sessions end after `session.timeout_minutes` idle. The `Secure` flag is off because the app runs on plain HTTP.
+
+Requests with `Authorization: Basic` are checked against the `users` table. A valid pair opens a 60-second session with the user and role set. It writes no `sessions` row. A bad pair gets a 401 with `WWW-Authenticate`. This lets curl call any route with `-u user:password`. A session cookie, when present and valid, wins over the header.
 
 The request filter still trusts the Tomcat session, not the `sessions` table.
 

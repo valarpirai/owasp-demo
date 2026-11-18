@@ -128,14 +128,14 @@ public class AuthFailuresHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Credential stuffing", "admin / admin123",
              "Try the seeded default credentials — no lockout means an attacker can test millions of leaked credential pairs.", "username",
-             "curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'JSESSIONID=SESSION' -d 'username=admin&password=admin123'"},
+             "curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'SESSION_COOKIE=SESSION' -d 'username=admin&password=admin123'"},
             {"Weak password spray", "user / password",
              "Spray one common password across all usernames. Without lockout this runs silently.", "username",
-             "for u in admin user guest root; do curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'JSESSIONID=SESSION' -d \"username=$u&password=password\" | grep -o 'Login OK\\|Invalid'; done"},
+             "for u in admin user guest root; do curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'SESSION_COOKIE=SESSION' -d \"username=$u&password=password\" | grep -o 'Login OK\\|Invalid'; done"},
             {"Token prediction", "admin_1700000000000",
              "The vulnerable token is username + System.currentTimeMillis(). Guess the timestamp window to forge it.",
              null,
-             "curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'JSESSIONID=SESSION' -d 'username=admin&password=admin123' | grep -o 'token.*</code>'"},
+             "curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'SESSION_COOKIE=SESSION' -d 'username=admin&password=admin123' | grep -o 'token.*</code>'"},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("auth-failures.badge.id"), Messages.get("auth-failures.badge.name"), Messages.get("auth-failures.badge.tag")) + info + exploits + panels;

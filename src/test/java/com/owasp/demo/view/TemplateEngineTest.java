@@ -158,4 +158,12 @@ class TemplateEngineTest {
         });
         assertFalse(box.contains("value='' OR '"), "Unescaped single quote must not break onclick attribute");
     }
+
+    @Test
+    void exploitBoxCurlUsesBasicAuth() {
+        String html = TemplateEngine.exploitBox(new String[][]{
+            {"t", "p", "d", "in", "curl -b 'SESSION_COOKIE=SESSION' http://x"}});
+        assertTrue(html.contains("-u admin:admin123"));
+        assertFalse(html.contains("SESSION_COOKIE"));
+    }
 }

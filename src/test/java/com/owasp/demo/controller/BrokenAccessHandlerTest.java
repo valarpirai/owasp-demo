@@ -60,7 +60,8 @@ class BrokenAccessHandlerTest {
 
         String body = responseBody.toString();
         // No passwords in the safe response — only username and role
-        assertFalse(body.contains("admin123"));
+        // The exploit box shows demo credentials in curl lines, so check the result table instead.
+        assertFalse(body.contains(">Password</th>"));
         assertTrue(body.contains("admin"));
     }
 

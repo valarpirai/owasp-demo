@@ -113,13 +113,13 @@ public class LoggingMonitoringHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Silent brute-force", "wrongpassword",
              "Submit wrong passwords repeatedly on the vulnerable panel — nothing is logged, attack is invisible.", "username",
-             "for p in password 123456 admin letmein; do curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' -d \"username=admin&password=$p\"; done"},
+             "for p in password 123456 admin letmein; do curl -s -X POST http://localhost:8090/logging/vulnerable -b 'SESSION_COOKIE=SESSION' -d \"username=admin&password=$p\"; done"},
             {"Valid credentials (no log)", "admin",
              "Even a successful login on the vulnerable side leaves no audit trail to correlate with prior failures.", "username",
-             "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' -d 'username=admin&password=admin123'"},
+             "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'SESSION_COOKIE=SESSION' -d 'username=admin&password=admin123'"},
             {"Log injection attempt", "admin\nLOGIN_SUCCESS user=attacker",
              "Some loggers write raw input. Newline injection can forge log entries to cover tracks.", "username",
-             "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode $'username=admin\\nLOGIN_SUCCESS user=attacker' -d 'password=x'"},
+             "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode $'username=admin\\nLOGIN_SUCCESS user=attacker' -d 'password=x'"},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("logging.badge.id"), Messages.get("logging.badge.name"), Messages.get("logging.badge.tag")) + info + exploits + panels;

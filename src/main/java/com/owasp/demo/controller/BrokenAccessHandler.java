@@ -117,15 +117,15 @@ public class BrokenAccessHandler implements IRouteHandler {
             {"Direct object access", "GET /bac/vulnerable",
              "Visit this URL as any logged-in user (even role=USER) to dump all user records including passwords.",
              null,
-             "curl -s http://localhost:8090/bac/vulnerable -b 'JSESSIONID=SESSION'"},
+             "curl -s http://localhost:8090/bac/vulnerable -b 'SESSION_COOKIE=SESSION'"},
             {"IDOR — change user ID", "GET /bac/vulnerable?id=1",
              "Predictable IDs let an attacker enumerate records by incrementing the id parameter.",
              null,
-             "curl -s 'http://localhost:8090/bac/vulnerable?id=1' -b 'JSESSIONID=SESSION'"},
+             "curl -s 'http://localhost:8090/bac/vulnerable?id=1' -b 'SESSION_COOKIE=SESSION'"},
             {"Role parameter tampering", "POST /bac/mitigated  body: role=ADMIN",
              "Sending a forged role in the request body bypasses client-enforced role checks.",
              null,
-             "curl -s -X POST http://localhost:8090/bac/mitigated -b 'JSESSIONID=SESSION' -d 'role=ADMIN'"},
+             "curl -s -X POST http://localhost:8090/bac/mitigated -b 'SESSION_COOKIE=SESSION' -d 'role=ADMIN'"},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("bac.badge.id"), Messages.get("bac.badge.name"), Messages.get("bac.badge.tag")) + info + exploits + panels;

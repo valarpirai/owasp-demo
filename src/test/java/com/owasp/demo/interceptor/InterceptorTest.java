@@ -56,6 +56,42 @@ class InterceptorTest {
         assertTrue(auth.preHandle(req, res, "/xss"));
     }
 
+    private static String basic(String credentials) {
+        return "Basic " + java.util.Base64.getEncoder().encodeToString(credentials.getBytes());
+    }
+
+    @Test
+    void auth_acceptsValidBasicCredentials() throws Exception {
+        HttpSession session = mock(HttpSession.class);
+        when(req.getHeader("Authorization")).thenReturn(basic("admin:admin123"));
+        when(req.getSession(true)).thenReturn(session);
+
+        assertTrue(auth.preHandle(req, res, "/xss"));
+
+        verify(session).setAttribute("user", "admin");
+        verify(session).setAttribute("role", "ADMIN");
+        verify(res, never()).sendRedirect(anyString());
+    }
+
+    @Test
+    void auth_rejectsWrongBasicPasswordWith401() throws Exception {
+        when(req.getHeader("Authorization")).thenReturn(basic("admin:wrong"));
+
+        assertFalse(auth.preHandle(req, res, "/xss"));
+
+        verify(res).setStatus(401);
+        verify(res).setHeader(eq("WWW-Authenticate"), contains("Basic"));
+    }
+
+    @Test
+    void auth_rejectsMalformedBasicHeaderWith401() throws Exception {
+        when(req.getHeader("Authorization")).thenReturn("Basic !!!not-base64");
+
+        assertFalse(auth.preHandle(req, res, "/xss"));
+
+        verify(res).setStatus(401);
+    }
+
     @Test
     void route_setsContentTypeAndSecurityHeaders() {
         RouteInterceptor route = new RouteInterceptor(auth);

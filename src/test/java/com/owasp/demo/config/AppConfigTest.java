@@ -51,6 +51,7 @@ class AppConfigTest {
     void genericLookupReadsNestedValues() {
         assertEquals(5, cfg.getInt("session.timeout_minutes"));
         assertEquals("Lax", cfg.getString("session.same_site"));
+        assertEquals("OWASP_SID", cfg.getString("session.cookie_name"));
         assertTrue(cfg.getStringList("security.public_paths").contains("/login"));
         assertEquals("DENY", cfg.getStringMap("security.headers").get("X-Frame-Options"));
     }

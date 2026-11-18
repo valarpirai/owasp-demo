@@ -5,6 +5,7 @@ server:
 session:
   timeout_minutes: 5
   same_site: Lax
+  cookie_name: OWASP_SID
 
 security:
   public_paths:

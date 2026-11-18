@@ -1,22 +1,32 @@
 package com.owasp.demo.interceptor;
 
 import com.owasp.demo.config.AppConfig;
+import com.owasp.demo.model.User;
 import com.owasp.demo.repository.SessionRepository;
+import com.owasp.demo.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Optional;
 import java.util.Set;
 
 /**
- * Sends anonymous users to /login. For logged-in users it moves the
- * sessions row expiry forward on every request.
+ * Lets logged-in users through. Anonymous browsers go to /login. A request with
+ * an Authorization: Basic header is checked against the users table, so curl
+ * can call any route with {@code -u user:password}. Bad credentials get a 401.
+ * Basic auth opens a short-lived session and writes no sessions row.
  */
 public class AuthInterceptor implements Interceptor {
 
     private final Set<String> publicPaths = Set.copyOf(AppConfig.get().getStringList("security.public_paths"));
     private final SessionRepository sessions = new SessionRepository();
+    private final UserRepository users = new UserRepository();
+
+    private static final int BASIC_SESSION_SECONDS = 60;
 
     /**
      * @param path the request path
@@ -31,12 +41,45 @@ public class AuthInterceptor implements Interceptor {
         if (isPublic(path)) return true;
 
         HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            res.sendRedirect("/login");
-            return false;
+        if (session != null && session.getAttribute("user") != null) {
+            touch(session);
+            return true;
         }
-        touch(session);
-        return true;
+
+        String header = req.getHeader("Authorization");
+        if (header != null && header.regionMatches(true, 0, "Basic ", 0, 6)) {
+            Optional<User> user = checkBasic(header.substring(6).trim());
+            if (user.isEmpty()) {
+                res.setStatus(401);
+                res.setHeader("WWW-Authenticate", "Basic realm=\"owasp-demo\", charset=\"UTF-8\"");
+                return false;
+            }
+            HttpSession basic = req.getSession(true);
+            basic.setAttribute("user", user.get().username());
+            basic.setAttribute("role", user.get().role());
+            basic.setMaxInactiveInterval(BASIC_SESSION_SECONDS);
+            return true;
+        }
+
+        res.sendRedirect("/login");
+        return false;
+    }
+
+    /**
+     * Decodes a Basic credential and checks it against the users table.
+     *
+     * @param encoded the Base64 text after "Basic "
+     * @return the user, or empty if the text or the credentials are bad
+     */
+    private Optional<User> checkBasic(String encoded) {
+        try {
+            String decoded = new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
+            int colon = decoded.indexOf(':');
+            if (colon < 0) return Optional.empty();
+            return users.findByUsernameAndPasswordSafe(decoded.substring(0, colon), decoded.substring(colon + 1));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**

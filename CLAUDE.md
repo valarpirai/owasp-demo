@@ -33,7 +33,7 @@ Plain Java 21, no Spring. Single servlet (`AppServlet`) mapped to `/*` dispatche
 4. Add the demo's title, badge (id, name, tag), info text and panel labels to `messages.yml`. Read them with `Messages.get("foo.title")`.
 5. Use `TemplateEngine.vulnerabilityBadge()`, `infoBox()`, and two `demoPanel()` calls — red for `/foo/vulnerable`, green for `/foo/mitigated`.
 
-`RouteInterceptor` writes the audit row for you and `AuthInterceptor` enforces login. Both run from `AppServlet` before and after each handler. Do not log demo requests in the handler. Settings go in `application.yml`, read with `AppConfig.get().getString("a.b")`. Full rules: `.claude/rules/new-demo.md`.
+`RouteInterceptor` writes the audit row for you and `AuthInterceptor` enforces login (session cookie or Basic auth). Both run from `AppServlet` before and after each handler. Do not log demo requests in the handler. Settings go in `application.yml`, read with `AppConfig.get().getString("a.b")`. Full rules: `.claude/rules/new-demo.md`.
 
 ### Templates
 
