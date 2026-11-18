@@ -22,7 +22,8 @@ public class IndexHandler implements IRouteHandler {
         new VulnCard("A08", "Data Integrity Failures",     "/integrity",       "Code and data integrity failures, insecure deserialization."),
         new VulnCard("A09", "Logging & Monitoring Failures","/logging",        "Insufficient logging prevents detection of active breaches."),
         new VulnCard("A10", "SSRF",                        "/ssrf",            "Server fetches a remote resource from an attacker-controlled URL."),
-        new VulnCard("A03", "OS Command Injection (RCE)", "/rce",             "User input concatenated into a shell command executes arbitrary OS commands.")
+        new VulnCard("A03", "OS Command Injection (RCE)", "/rce",             "User input concatenated into a shell command executes arbitrary OS commands."),
+        new VulnCard("A01", "Cross-Site Request Forgery", "/csrf",            "A forged request rides on the victim's session cookie to change state.")
     };
 
     @Override

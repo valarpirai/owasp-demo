@@ -29,6 +29,7 @@ Open `http://localhost:8090`. Log in with `admin / admin123`.
 | ID  | Name                              | Path               |
 |-----|-----------------------------------|--------------------|
 | A01 | Broken Access Control             | `/bac`             |
+| A01 | Cross-Site Request Forgery       | `/csrf`            |
 | A02 | Cryptographic Failures            | `/crypto`          |
 | A03 | Injection — SQL                   | `/sqli`            |
 | A03 | Injection — XSS                   | `/xss`             |

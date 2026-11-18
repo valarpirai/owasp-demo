@@ -59,6 +59,11 @@ GET  /bac                        broken access control demo page
 GET  /bac/vulnerable             no role check
 GET  /bac/mitigated              role check enforced
 
+GET  /csrf                       CSRF demo page
+GET  /csrf/attack                attacker page, auto-posts a forged form
+POST /csrf/vulnerable            cookie only, no token
+POST /csrf/mitigated             per-session token required
+
 GET  /crypto                     crypto failures demo page
 POST /crypto/vulnerable          MD5, no salt
 POST /crypto/mitigated           SHA-256 + random salt

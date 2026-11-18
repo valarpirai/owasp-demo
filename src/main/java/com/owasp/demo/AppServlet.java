@@ -82,6 +82,12 @@ public class AppServlet extends HttpServlet {
         routes.put("POST /rce/vulnerable", rce);
         routes.put("POST /rce/mitigated", rce);
 
+        CsrfHandler csrf = new CsrfHandler();
+        routes.put("GET /csrf", csrf);
+        routes.put("GET /csrf/attack", csrf);
+        routes.put("POST /csrf/vulnerable", csrf);
+        routes.put("POST /csrf/mitigated", csrf);
+
         DbBrowserHandler dbBrowser = new DbBrowserHandler();
         routes.put("GET /db-browser", dbBrowser);
         routes.put("GET /db-browser/table", dbBrowser);
