@@ -16,7 +16,7 @@ A Java 21 web app. It runs on embedded Tomcat. It shows each OWASP Top 10 vulner
 | Database   | H2 in-memory                  |
 | UI         | Tailwind CSS via CDN          |
 | Templates  | HTML files + Java strings     |
-| DB access  | jOOQ                          |
+| DB access  | jOOQ over HikariCP pool       |
 | Config     | SnakeYAML + application.yml   |
 | Page text  | SnakeYAML + messages.yml      |
 
@@ -134,6 +134,8 @@ The request filter still trusts the Tomcat session, not the `sessions` table.
 The H2 web console runs at `/h2-console`. `Main` mounts H2's `JakartaWebServlet` there when `h2_console.enabled` is true. `ConsoleAuthFilter` sits in front and applies the same login rules as the rest of the app, so the console is not open to anonymous requests. It connects to the in-memory database in the same JVM. H2 also refuses non-local connections by default.
 
 Four tables: `users`, `products`, `audit_log`, `sessions`. `Database.init()` creates them and seeds two users on startup. Seed values come from `application.yml`, not hardcoded.
+
+Connections come from a HikariCP pool. `Database.getConnection()` borrows one. Close it to give it back. jOOQ borrows one per statement through `Database.dataSource()`, so repositories never close anything. Size and timeouts live under `database.pool` in `application.yml`: `max_size` 10, `min_idle` 2, `connection_timeout_ms` 5000. The pool logs a warning with a stack trace if a connection stays out longer than `leak_detection_ms` (10 seconds). That finds a missing `close()`. Logs go through `slf4j-simple` to stderr. `Main` closes the pool on shutdown.
 
 Passwords are stored as bcrypt hashes. `PasswordHasher` wraps jBCrypt. The cost is `auth.bcrypt_cost` (default 10). Each hash has its own salt. Seeding hashes the config password once and skips users that already exist. Login, Basic auth and the demo logins call `UserRepository.findByUsernameAndPasswordSafe()`, which loads the user by name and checks the hash. An unknown name still burns one hash check, so timing does not reveal which names exist. The login page buttons read the demo passwords from config, because the database holds no clear text.
 

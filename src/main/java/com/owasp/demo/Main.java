@@ -19,6 +19,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         AppConfig cfg = AppConfig.get();
         Database.init();
+        Runtime.getRuntime().addShutdownHook(new Thread(Database::shutdown));
 
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(cfg.getServerPort());

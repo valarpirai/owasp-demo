@@ -7,7 +7,7 @@ A Java 21 web app that shows each OWASP Top 10 (2021) vulnerability. Every page 
 - Java 21, Gradle 8
 - Apache Tomcat 10.1 (embedded), one virtual thread per request
 - H2 in-memory database
-- jOOQ for queries
+- jOOQ for queries, over a HikariCP connection pool
 - Tailwind CSS via CDN
 
 ## Run

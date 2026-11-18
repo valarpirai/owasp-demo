@@ -2,9 +2,11 @@ package com.owasp.demo.db;
 
 import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.util.PasswordHasher;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,9 +14,59 @@ import java.sql.Statement;
 
 public class Database {
 
+    /** Created on first use. The holder class makes that thread-safe without a lock. */
+    private static final class Pool {
+        static final HikariDataSource DS = create();
+
+        private static HikariDataSource create() {
+            AppConfig cfg = AppConfig.get();
+            HikariConfig hc = new HikariConfig();
+            hc.setPoolName(cfg.getString("database.pool.name"));
+            hc.setJdbcUrl(cfg.getDbUrl());
+            hc.setUsername(cfg.getDbUsername());
+            hc.setPassword(cfg.getDbPassword());
+            hc.setMaximumPoolSize(cfg.getInt("database.pool.max_size"));
+            hc.setMinimumIdle(cfg.getInt("database.pool.min_idle"));
+            hc.setConnectionTimeout(cfg.getInt("database.pool.connection_timeout_ms"));
+            // Logs a warning with a stack trace if a connection is held too long. It finds missing close() calls.
+            hc.setLeakDetectionThreshold(cfg.getInt("database.pool.leak_detection_ms"));
+            return new HikariDataSource(hc);
+        }
+    }
+
+    /**
+     * Borrows a connection from the pool. Close it to give it back.
+     *
+     * @return a pooled connection
+     */
     public static Connection getConnection() throws SQLException {
-        AppConfig cfg = AppConfig.get();
-        return DriverManager.getConnection(cfg.getDbUrl(), cfg.getDbUsername(), cfg.getDbPassword());
+        return Pool.DS.getConnection();
+    }
+
+    /**
+     * @return the pool, for libraries that borrow connections themselves
+     */
+    public static DataSource dataSource() {
+        return Pool.DS;
+    }
+
+    /**
+     * @return connections that are checked out right now
+     */
+    public static int activeConnections() {
+        return Pool.DS.getHikariPoolMXBean().getActiveConnections();
+    }
+
+    /**
+     * @return the most connections the pool will open
+     */
+    public static int maxConnections() {
+        return Pool.DS.getMaximumPoolSize();
+    }
+
+    /** Closes the pool. Call once when the app stops. */
+    public static void shutdown() {
+        Pool.DS.close();
     }
 
     /**

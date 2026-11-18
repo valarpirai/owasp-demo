@@ -56,6 +56,12 @@ database:
   url: jdbc:h2:mem:owaspdb;DB_CLOSE_DELAY=-1
   username: sa
   password: ""
+  pool:
+    name: owasp-pool
+    max_size: 10
+    min_idle: 2
+    connection_timeout_ms: 5000
+    leak_detection_ms: 10000
 
 app:
   name: "OWASP Top 10 Demo"
