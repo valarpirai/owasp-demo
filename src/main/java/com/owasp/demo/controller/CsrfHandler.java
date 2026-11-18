@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,8 +19,8 @@ import java.util.Base64;
  */
 public class CsrfHandler implements IRouteHandler {
 
-    private static final String DEFAULT_EMAIL = "alice@example.com";
-    private static final String ATTACKER_EMAIL = "attacker@evil.example";
+    private static final String DEFAULT_EMAIL = AppConfig.get().getString("csrf.default_email");
+    private static final String ATTACKER_EMAIL = AppConfig.get().getString("csrf.attacker_email");
     private static final String EMAIL_VULN = "csrfEmailVulnerable";
     private static final String EMAIL_SAFE = "csrfEmailMitigated";
     private static final String TOKEN = "csrfToken";

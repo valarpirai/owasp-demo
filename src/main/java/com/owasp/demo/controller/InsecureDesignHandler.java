@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class InsecureDesignHandler implements IRouteHandler {
 
-    private static final String CORRECT_OTP = "123456";
+    private static final String CORRECT_OTP = AppConfig.get().getString("otp.correct_code");
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {

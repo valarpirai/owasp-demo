@@ -46,4 +46,17 @@ class AppConfigTest {
     void otpMaxAttemptsIsLoaded() {
         assertTrue(cfg.getOtpMaxAttempts() > 0);
     }
+
+    @Test
+    void genericLookupReadsNestedValues() {
+        assertEquals(30, cfg.getInt("session.timeout_minutes"));
+        assertEquals("Lax", cfg.getString("session.same_site"));
+        assertTrue(cfg.getStringList("security.public_paths").contains("/login"));
+        assertEquals("DENY", cfg.getStringMap("security.headers").get("X-Frame-Options"));
+    }
+
+    @Test
+    void genericLookupThrowsForMissingKey() {
+        assertThrows(IllegalStateException.class, () -> cfg.getString("no.such.key"));
+    }
 }

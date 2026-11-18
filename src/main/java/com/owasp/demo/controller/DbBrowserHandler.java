@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.repository.DbBrowserRepository;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +12,7 @@ import java.util.Map;
 
 public class DbBrowserHandler implements IRouteHandler {
 
-    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int DEFAULT_PAGE_SIZE = AppConfig.get().getInt("db_browser.default_page_size");
     private final DbBrowserRepository repo = new DbBrowserRepository();
 
     @Override

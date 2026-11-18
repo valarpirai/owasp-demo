@@ -1,5 +1,6 @@
 package com.owasp.demo.config;
 
+import com.owasp.demo.util.ConfigUtil;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -10,6 +11,7 @@ public class AppConfig {
 
     private static final AppConfig INSTANCE = new AppConfig();
 
+    private final Map<String, Object> root;
     private final int serverPort;
     private final String dbUrl;
     private final String dbUsername;
@@ -32,6 +34,7 @@ public class AppConfig {
         Yaml yaml = new Yaml();
         InputStream in = getClass().getClassLoader().getResourceAsStream("application.yml");
         Map<String, Object> cfg = yaml.load(in);
+        root = cfg;
 
         Map<String, Object> server = (Map<String, Object>) cfg.get("server");
         serverPort = (int) server.get("port");
@@ -88,4 +91,28 @@ public class AppConfig {
     public int getLockoutMinutes()    { return lockoutMinutes; }
     public int getOtpMaxAttempts()    { return otpMaxAttempts; }
     public String getHmacSecret()     { return hmacSecret; }
+
+    /**
+     * @param path dotted key path, such as "session.same_site"
+     * @return the string value at the path
+     */
+    public String getString(String path) { return ConfigUtil.getString(root, path); }
+
+    /**
+     * @param path dotted key path
+     * @return the int value at the path
+     */
+    public int getInt(String path) { return ConfigUtil.getInt(root, path); }
+
+    /**
+     * @param path dotted key path
+     * @return the list of strings at the path
+     */
+    public List<String> getStringList(String path) { return ConfigUtil.getStringList(root, path); }
+
+    /**
+     * @param path dotted key path
+     * @return the map of strings at the path
+     */
+    public Map<String, String> getStringMap(String path) { return ConfigUtil.getStringMap(root, path); }
 }

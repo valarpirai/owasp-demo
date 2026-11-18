@@ -1,5 +1,6 @@
 package com.owasp.demo;
 
+import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.controller.*;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +16,7 @@ public class AppServlet extends HttpServlet {
 
     private final Map<String, IRouteHandler> routes = new HashMap<>();
 
-    private static final Set<String> PUBLIC_PATHS = Set.of("/login", "/logout");
+    private static final Set<String> PUBLIC_PATHS = Set.copyOf(AppConfig.get().getStringList("security.public_paths"));
 
     public AppServlet() {
         LoginHandler login = new LoginHandler();
@@ -96,8 +97,7 @@ public class AppServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("text/html;charset=UTF-8");
-        res.setHeader("X-Content-Type-Options", "nosniff");
-        res.setHeader("X-Frame-Options", "DENY");
+        AppConfig.get().getStringMap("security.headers").forEach(res::setHeader);
 
         String path = req.getPathInfo();
         if (path == null || path.isEmpty()) path = "/";

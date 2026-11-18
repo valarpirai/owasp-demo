@@ -1,5 +1,32 @@
 server:
   port: 8090
+  bind_address: 127.0.0.1
+
+session:
+  timeout_minutes: 30
+  same_site: Lax
+
+security:
+  public_paths:
+    - /login
+    - /logout
+  headers:
+    X-Content-Type-Options: nosniff
+    X-Frame-Options: DENY
+
+csrf:
+  default_email: alice@example.com
+  attacker_email: attacker@evil.example
+
+rce:
+  safe_host_pattern: "^[a-zA-Z0-9._-]{1,253}$"
+  demo_hosts:
+    - localhost
+    - example.com
+    - 127.0.0.1
+
+db_browser:
+  default_page_size: 10
 
 database:
   url: jdbc:h2:mem:owaspdb;DB_CLOSE_DELAY=-1
@@ -29,6 +56,7 @@ auth:
 
 otp:
   max_attempts: 5
+  correct_code: "123456"
 
 integrity:
   hmac_secret: "change-me-in-production-use-32-chars-min"

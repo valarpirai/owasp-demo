@@ -10,21 +10,19 @@ import java.io.File;
 
 public class Main {
 
-    private static final int SESSION_TIMEOUT_MINUTES = 30;
-
     public static void main(String[] args) throws Exception {
         AppConfig cfg = AppConfig.get();
         Database.init();
 
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(cfg.getServerPort());
-        tomcat.getConnector().setProperty("address", "127.0.0.1");
+        tomcat.getConnector().setProperty("address", cfg.getString("server.bind_address"));
 
         Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
         ctx.setUseHttpOnly(true);
-        ctx.setSessionTimeout(SESSION_TIMEOUT_MINUTES);
+        ctx.setSessionTimeout(cfg.getInt("session.timeout_minutes"));
         Rfc6265CookieProcessor cookies = new Rfc6265CookieProcessor();
-        cookies.setSameSiteCookies("Lax");
+        cookies.setSameSiteCookies(cfg.getString("session.same_site"));
         ctx.setCookieProcessor(cookies);
         Tomcat.addServlet(ctx, "appServlet", new AppServlet());
         ctx.addServletMappingDecoded("/*", "appServlet");

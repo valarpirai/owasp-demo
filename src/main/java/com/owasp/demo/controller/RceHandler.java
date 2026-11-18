@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,8 +13,8 @@ import java.util.stream.Collectors;
 
 public class RceHandler implements IRouteHandler {
 
-    private static final Pattern SAFE_HOST  = Pattern.compile("^[a-zA-Z0-9._-]{1,253}$");
-    private static final java.util.Set<String> DEMO_HOSTS = java.util.Set.of("localhost", "example.com", "127.0.0.1");
+    private static final Pattern SAFE_HOST  = Pattern.compile(AppConfig.get().getString("rce.safe_host_pattern"));
+    private static final java.util.Set<String> DEMO_HOSTS = java.util.Set.copyOf(AppConfig.get().getStringList("rce.demo_hosts"));
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
