@@ -92,6 +92,11 @@ public class AppServlet extends HttpServlet {
         routes.put("POST /csrf/vulnerable", csrf);
         routes.put("POST /csrf/mitigated", csrf);
 
+        Java4ShellHandler java4shell = new Java4ShellHandler();
+        routes.put("GET /java4shell", java4shell);
+        routes.put("POST /java4shell/vulnerable", java4shell);
+        routes.put("POST /java4shell/mitigated", java4shell);
+
         DbBrowserHandler dbBrowser = new DbBrowserHandler();
         routes.put("GET /db-browser", dbBrowser);
         routes.put("GET /db-browser/table", dbBrowser);

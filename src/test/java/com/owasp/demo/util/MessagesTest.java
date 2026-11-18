@@ -14,7 +14,7 @@ class MessagesTest {
 
     @Test
     void cardsLoadInOrder() {
-        assertEquals(13, Messages.getList("cards").size());
+        assertEquals(14, Messages.getList("cards").size());
         assertEquals("A01", Messages.getList("cards").get(0).get("id"));
     }
 

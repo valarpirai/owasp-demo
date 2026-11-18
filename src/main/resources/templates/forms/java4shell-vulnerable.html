@@ -1,0 +1,8 @@
+<form method="POST" action="/java4shell/vulnerable" class="space-y-3">
+  <label class="block text-sm font-medium text-gray-700">Base64 data to decode</label>
+  <input type="text" name="data" placeholder="e.g. SGVsbG8gSmF2YTRTaGVsbA=="
+    value="{value}"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono"/>
+  <p class="text-xs text-gray-500">No size limit. No alphabet check. Straight to the JDK decoder.</p>
+  <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Decode (Unchecked)</button>
+</form>

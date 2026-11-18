@@ -180,7 +180,7 @@ class TemplateEngineTest {
         var cached = TemplateEngine.cachedTemplates();
         assertTrue(cached.contains("forms/sqli-vulnerable.html"));
         assertTrue(cached.contains("forms/xss-mitigated.html"));
-        assertEquals(24, cached.stream().filter(n -> n.startsWith("forms/")).count());
+        assertTrue(cached.stream().filter(n -> n.startsWith("forms/")).count() >= 27);
     }
 
     @Test

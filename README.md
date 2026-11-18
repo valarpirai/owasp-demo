@@ -47,6 +47,7 @@ A wrong password gets a 401. No credentials gets a redirect to `/login`. The cur
 | A04 | Insecure Design                   | `/insecure-design` |
 | A05 | Security Misconfiguration         | `/misconfig`       |
 | A06 | Vulnerable & Outdated Components  | `/vuln-components` |
+| A06 | Java4Shell (CVE-2026-114938)      | `/java4shell`      |
 | A07 | Identification & Auth Failures    | `/auth-failures`   |
 | A08 | Software & Data Integrity Failures| `/integrity`       |
 | A09 | Security Logging & Monitoring     | `/logging`         |

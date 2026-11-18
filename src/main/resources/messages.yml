@@ -151,6 +151,18 @@ ssrf:
   panel:
     vulnerable: "Vulnerable — Fetch Any URL"
     mitigated: "Mitigated — Allowlist Enforced"
+java4shell:
+  info:
+    explanation: "Java4Shell (CVE-2026-114938) is a memory corruption bug in OpenJDK's Base64 decoder. On x86-64 CPUs with AVX-512 VBMI, a fast path writes past its buffer when it decodes a crafted string. Any app that passes untrusted data to the JDK Base64 decoder, for example from a web request, can be reached. Per Tenable, the impact ranges from a crash to memory disclosure and code execution. This page cannot trigger the bug. It shows your JVM's exposure and what an unchecked decode endpoint looks like."
+    mitigation: "Patch first. Oracle fixed builds are 17.0.21.1, 21.0.13.1, 25.0.5.1 and 27.0.1.1. Other vendors publish their own. Until then, start the JVM with <code>-XX:-UseBASE64Intrinsics</code> or <code>-XX:UseAVX=2</code> (x86-64 only). Also cap the size of input and check the alphabet before you decode. That limits what an attacker can send. It does not replace the patch."
+  badge:
+    id: "A06"
+    name: "Vulnerable & Outdated Components — Java4Shell (CVE-2026-114938)"
+    tag: "Java4Shell"
+  title: "Java4Shell"
+  panel:
+    vulnerable: "Vulnerable — Unchecked Base64 Decode"
+    mitigated: "Mitigated — Validate Before Decode (defence in depth)"
 cards:
   - id: "A01"
     tag: "Access Control"
@@ -197,6 +209,11 @@ cards:
     name: "Vulnerable Components"
     path: "/vuln-components"
     description: "Components with known vulnerabilities used without patching."
+  - id: "A06"
+    tag: "Java4Shell"
+    name: "Java4Shell (CVE-2026-114938)"
+    path: "/java4shell"
+    description: "OpenJDK Base64 decoder memory corruption, reachable through untrusted input."
   - id: "A07"
     tag: "Auth"
     name: "Auth Failures"

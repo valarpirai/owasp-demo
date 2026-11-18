@@ -81,6 +81,10 @@ GET  /misconfig/mitigated        generic error, nothing exposed
 
 GET  /vuln-components            known CVEs in listed dependencies
 
+GET  /java4shell                 Java4Shell demo page and JVM exposure check
+POST /java4shell/vulnerable      Base64 decode, no checks
+POST /java4shell/mitigated       size and alphabet checked first
+
 GET  /auth-failures              auth failures demo page
 POST /auth-failures/vulnerable   no lockout, predictable token
 POST /auth-failures/mitigated    lockout + UUID token
@@ -147,6 +151,9 @@ Four tables: `users`, `products`, `audit_log`, `sessions`. `Database.init()` cre
 | 10 | A10 | SSRF                          | Fetches any URL (safety guard for private IPs) | Allowlist by parsed origin |
 | 11 | A03 | OS Command Injection (RCE)    | sh -c string concat (demo host + ls only) | ProcessBuilder + regex allowlist |
 | 12 | A01 | CSRF                          | Email change on cookie alone        | Per-session token, 403 without it   |
+| 13 | A06 | Java4Shell (CVE-2026-114938)  | Untrusted Base64 straight to the decoder | Size + alphabet checks; patch or JVM flag is the real fix |
+
+The Java4Shell page cannot trigger the bug. It lives in the JVM's native Base64 code. Instead `JvmExposureCheck` compares the running JVM with the advisory: Java line (17, 21, 25, 27), x86-64, AVX-512 VBMI CPU flags from `/proc/cpuinfo`, and the flags `-XX:-UseBASE64Intrinsics` or `-XX:UseAVX=2`. It cannot read the vendor patch level, so it never says "patched". The lists live under `java4shell` in `application.yml`. Source: Tenable's FAQ for CVE-2026-114938.
 
 ---
 
