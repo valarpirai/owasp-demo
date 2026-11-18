@@ -1,6 +1,8 @@
 package com.owasp.demo.controller;
 
 import com.owasp.demo.model.User;
+import com.owasp.demo.config.AppConfig;
+import com.owasp.demo.repository.SessionRepository;
 import com.owasp.demo.repository.UserRepository;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +16,7 @@ import java.util.Optional;
 public class LoginHandler implements IRouteHandler {
 
     private final UserRepository userRepository = new UserRepository();
+    private final SessionRepository sessionRepository = new SessionRepository();
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -21,7 +24,14 @@ public class LoginHandler implements IRouteHandler {
 
         if ("GET".equals(req.getMethod()) && "/logout".equals(path)) {
             HttpSession session = req.getSession(false);
-            if (session != null) session.invalidate();
+            if (session != null) {
+                try {
+                    sessionRepository.delete(session.getId());
+                } catch (Exception ignored) {
+                    // The cookie is invalidated below either way.
+                }
+                session.invalidate();
+            }
             res.sendRedirect("/login");
             return;
         }
@@ -50,6 +60,8 @@ public class LoginHandler implements IRouteHandler {
                 }
                 session.setAttribute("user", user.get().username());
                 session.setAttribute("role", user.get().role());
+                sessionRepository.create(session.getId(), user.get().id(),
+                    AppConfig.get().getInt("session.timeout_minutes"));
                 res.sendRedirect("/");
             } else {
                 renderLogin(res, "Invalid username or password.");

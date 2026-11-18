@@ -68,6 +68,7 @@ class LoginHandlerTest {
         when(req.getParameter("username")).thenReturn("admin");
         when(req.getParameter("password")).thenReturn("admin123");
         when(req.getSession(true)).thenReturn(session);
+        when(session.getId()).thenReturn("redirect-test-session");
 
         handler.handle(req, res);
 
@@ -122,10 +123,12 @@ class LoginHandlerTest {
         when(req.getParameter("username")).thenReturn("admin");
         when(req.getParameter("password")).thenReturn("admin123");
         when(req.getSession(false)).thenReturn(session);
+        when(session.getId()).thenReturn("login-test-session");
 
         handler.handle(req, res);
 
         verify(req).changeSessionId();
         verify(session).setAttribute("user", "admin");
+        assertTrue(new com.owasp.demo.repository.SessionRepository().exists("login-test-session"));
     }
 }

@@ -12,16 +12,23 @@ Follow these rules for every new demo. `CsrfHandler` is the reference.
 ## Wiring
 
 1. Register every route in the `AppServlet` constructor.
-2. Add a card to `IndexHandler.CARDS`.
+2. Add a card to the `cards:` list in `messages.yml`, in OWASP ID order.
 3. Add a row to the table in `README.md`.
 4. Add the routes to `docs/design.md`.
 
 ## Page
 
+- Put titles, tag, info text and panel labels in `messages.yml`. Read them with `Messages.get()`. No page text in Java.
+- Put settings in `application.yml`. Read them with `AppConfig.get()`.
 - Build the page with `TemplateEngine`: `vulnerabilityBadge()`, `infoBox()`, `exploitBox()`.
 - Use two `demoPanel()` calls. Red is vulnerable. Green is mitigated.
 - Escape every user value with `TemplateEngine.escape()`. The vulnerable side may skip it only when the flaw is the missing escape.
 - Show ready payloads in `exploitBox()`, with a curl line.
+
+## Audit
+
+- `AppServlet` logs every demo request to `audit_log`. Do not add your own log call.
+- Never put secrets in a handler's parameter names. Values are not logged.
 
 ## Safety
 

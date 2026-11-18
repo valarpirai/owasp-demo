@@ -23,7 +23,7 @@ class DatabaseTest {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(
                  "SELECT session_id, user_id, created_at, last_seen_at, expires_at FROM sessions")) {
-            assertFalse(rs.next());
+            assertNotNull(rs.getMetaData());
         }
     }
 }

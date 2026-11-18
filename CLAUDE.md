@@ -29,8 +29,11 @@ Plain Java 21, no Spring. Single servlet (`AppServlet`) mapped to `/*` dispatche
 
 1. Create `controller/MyHandler.java` implementing `IRouteHandler`.
 2. Register routes in `AppServlet`'s constructor.
-3. Add a card to `IndexHandler.CARDS`.
-4. Use `TemplateEngine.vulnerabilityBadge()`, `infoBox()`, and two `demoPanel()` calls — red for `/foo/vulnerable`, green for `/foo/mitigated`.
+3. Add a card to the `cards:` list in `messages.yml`. Keep the list in OWASP ID order.
+4. Add the demo's title, badge (id, name, tag), info text and panel labels to `messages.yml`. Read them with `Messages.get("foo.title")`.
+5. Use `TemplateEngine.vulnerabilityBadge()`, `infoBox()`, and two `demoPanel()` calls — red for `/foo/vulnerable`, green for `/foo/mitigated`.
+
+`AppServlet` writes the audit row for you. Do not log demo requests in the handler. Settings go in `application.yml`, read with `AppConfig.get().getString("a.b")`. Full rules: `.claude/rules/new-demo.md`.
 
 ### Templates
 

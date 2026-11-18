@@ -18,6 +18,7 @@ A Java 21 web app. It runs on embedded Tomcat. It shows each OWASP Top 10 vulner
 | Templates  | HTML files + Java strings     |
 | DB access  | jOOQ                          |
 | Config     | SnakeYAML + application.yml   |
+| Page text  | SnakeYAML + messages.yml      |
 
 ---
 
@@ -28,6 +29,7 @@ com.owasp.demo/
 ├── Main.java              — starts Tomcat
 ├── AppServlet.java        — one servlet, routes all requests
 ├── config/                — loads application.yml at startup
+├── util/                  — ConfigUtil (dotted YAML lookup), Messages (loads messages.yml)
 ├── controller/            — one handler per vulnerability
 ├── model/                 — User, Product, AuditLog records
 ├── repository/            — jOOQ queries; one class per table
@@ -103,13 +105,24 @@ POST /rce/mitigated              ProcessBuilder arg array + hostname allowlist
 
 ## Auth
 
-Login is session-based via `HttpSession`. The seed admin is `admin / admin123`. Every protected route checks for a session. No session means redirect to `/login`.
+Login is session-based via `HttpSession`. Every protected route checks for a session. No session means redirect to `/login`.
+
+The login page lists every user from the `users` table. A button fills the form. Passwords show on purpose. This is a local demo.
+
+On login the app:
+
+- Rotates the session ID with `changeSessionId()`. This stops session fixation.
+- Writes a row to `sessions`. The row holds a SHA-256 hash of the ID, the user, and UTC timestamps. Logout deletes it.
+
+Tomcat sets the cookie `HttpOnly` and `SameSite=Lax`. Sessions end after `session.timeout_minutes` idle. The `Secure` flag is off because the app runs on plain HTTP.
+
+The request filter still trusts the Tomcat session, not the `sessions` table.
 
 ---
 
 ## Database
 
-Three tables: `users`, `products`, `audit_log`. `Database.init()` creates them and seeds two users on startup. Seed values come from `application.yml`, not hardcoded.
+Four tables: `users`, `products`, `audit_log`, `sessions`. `Database.init()` creates them and seeds two users on startup. Seed values come from `application.yml`, not hardcoded.
 
 ---
 
@@ -128,6 +141,7 @@ Three tables: `users`, `products`, `audit_log`. `Database.init()` creates them a
 | 9  | A09 | Logging Failures              | Failed login silent                 | Failed login in audit_log           |
 | 10 | A10 | SSRF                          | Fetches any URL (safety guard for private IPs) | Allowlist by parsed origin |
 | 11 | A03 | OS Command Injection (RCE)    | sh -c string concat (demo hosts only) | ProcessBuilder + regex allowlist |
+| 12 | A01 | CSRF                          | Email change on cookie alone        | Per-session token, 403 without it   |
 
 ---
 
@@ -143,7 +157,27 @@ The app is a local-only playground. Three layers keep it from causing real harm:
 | RCE host allowlist | `RceHandler` | Only `localhost`, `example.com`, `127.0.0.1` run a real `ping`. Other valid hostnames show the constructed command without executing it. |
 | Shell injection guard | `RceHandler` | Any input that fails the `[a-zA-Z0-9._-]` regex shows `INJECTION DETECTED` and the constructed command, not executed. |
 | HMAC secret in config | `application.yml` | Secret lives outside source. Change it before any shared deployment. |
-| Security headers | `AppServlet` | `X-Content-Type-Options: nosniff` and `X-Frame-Options: DENY` on every response. |
+| Security headers | `AppServlet` | Headers from `security.headers` in `application.yml`. Default: `nosniff` and `X-Frame-Options: DENY`. |
+
+---
+
+## Audit Log
+
+`AppServlet` writes one `audit_log` row for every demo request. Login, logout and the dashboard are not logged.
+
+| Event             | When                        |
+|-------------------|-----------------------------|
+| `DEMO_VIEW`       | A demo page is opened       |
+| `DEMO_VULNERABLE` | The vulnerable path is used |
+| `DEMO_MITIGATED`  | The mitigated path is used  |
+
+Details read `user=… method=… path=… status=… params=…`. It lists parameter names only. Values are left out because demos receive passwords and secrets. A failed write never breaks the request.
+
+---
+
+## Config and Text
+
+`application.yml` holds settings. `messages.yml` holds page text. `ConfigUtil` reads both by dotted path, such as `session.same_site`. `Messages.get("xss.title")` returns page text. A missing key fails fast with its name.
 
 ---
 

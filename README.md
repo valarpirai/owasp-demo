@@ -29,7 +29,7 @@ Open `http://localhost:8090`. Log in with `admin / admin123`.
 | ID  | Name                              | Path               |
 |-----|-----------------------------------|--------------------|
 | A01 | Broken Access Control             | `/bac`             |
-| A01 | Cross-Site Request Forgery       | `/csrf`            |
+| A01 | Cross-Site Request Forgery        | `/csrf`            |
 | A02 | Cryptographic Failures            | `/crypto`          |
 | A03 | Injection — SQL                   | `/sqli`            |
 | A03 | Injection — XSS                   | `/xss`             |
@@ -48,7 +48,18 @@ This app is a local-only playground. It binds to `127.0.0.1` only. Dangerous pay
 
 ## Configuration
 
-Edit `src/main/resources/application.yml` to change port, credentials, SSRF allowlist, and lockout limits. The HMAC secret for the data integrity demo lives there too — never use the default in a real app.
+Two YAML files hold the strings. Java code holds none of these.
+
+- `application.yml` — settings. Port, bind address, credentials, session timeout, cookie `SameSite`, security headers, SSRF and RCE allowlists, lockout limits, OTP code. The HMAC secret lives here too. Never use the default in a real app.
+- `messages.yml` — page text. Titles, tags, explanation and mitigation text, panel labels, and the dashboard cards.
+
+Exploit payloads and form markup stay in the handlers.
+
+## Sessions and audit
+
+Login rotates the session ID. The cookie is `HttpOnly` and `SameSite=Lax`. Sessions expire after 30 minutes idle. Each login writes a row to the `sessions` table. It stores a SHA-256 hash of the ID, not the ID.
+
+Every demo request writes a row to `audit_log`. Open `/db-browser` to read it.
 
 ## Docs
 
