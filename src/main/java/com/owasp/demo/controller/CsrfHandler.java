@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
@@ -99,12 +100,8 @@ public class CsrfHandler implements IRouteHandler {
         HttpSession session = req.getSession();
 
         String info = TemplateEngine.infoBox(
-            "The server trusts the session cookie alone. The browser attaches that cookie to every " +
-            "request for this site, even one triggered by a page the attacker controls. A hidden form " +
-            "on <code>evil.example</code> can post to this app and change the victim's email.",
-            "Require a secret, unpredictable token in every state-changing request and compare it with " +
-            "the one stored in the session. Set <code>SameSite=Lax</code> or <code>Strict</code> on the " +
-            "session cookie as a second layer."
+            Messages.get("csrf.info.explanation"),
+            Messages.get("csrf.info.mitigation")
         );
 
         String vulnForm = """
@@ -141,8 +138,8 @@ public class CsrfHandler implements IRouteHandler {
               %s
             </div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — Cookie Only", "red", vulnForm, vulnResult != null ? vulnResult : ""),
-                TemplateEngine.demoPanel("Mitigated — Anti-CSRF Token", "green", safeForm, safeResult != null ? safeResult : ""));
+                TemplateEngine.demoPanel(Messages.get("csrf.panel.vulnerable"), "red", vulnForm, vulnResult != null ? vulnResult : ""),
+                TemplateEngine.demoPanel(Messages.get("csrf.panel.mitigated"), "green", safeForm, safeResult != null ? safeResult : ""));
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Forged form post", "<form action=\"http://localhost:8090/csrf/vulnerable\" method=\"POST\"><input name=\"email\" value=\"" + ATTACKER_EMAIL + "\"></form><script>document.forms[0].submit()</script>",
@@ -153,9 +150,9 @@ public class CsrfHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/csrf/mitigated -b 'JSESSIONID=SESSION' --data-urlencode 'email=" + ATTACKER_EMAIL + "'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control — Cross-Site Request Forgery (CSRF)", "CSRF")
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("csrf.badge.id"), Messages.get("csrf.badge.name"), Messages.get("csrf.badge.tag"))
             + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("CSRF", content, true));
+        res.getWriter().write(TemplateEngine.page(Messages.get("csrf.title"), content, true));
     }
 
     /**

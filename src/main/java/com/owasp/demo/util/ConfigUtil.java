@@ -70,4 +70,20 @@ public final class ConfigUtil {
         raw.forEach((k, v) -> out.put(k, String.valueOf(v)));
         return out;
     }
+
+    /**
+     * @param root parsed YAML map
+     * @param path dotted key path
+     * @return the value as a list of string maps
+     */
+    @SuppressWarnings("unchecked")
+    public static List<Map<String, String>> getMapList(Map<String, Object> root, String path) {
+        List<Map<String, String>> out = new java.util.ArrayList<>();
+        for (Object item : (List<Object>) lookup(root, path)) {
+            Map<String, String> row = new java.util.LinkedHashMap<>();
+            ((Map<String, Object>) item).forEach((k, v) -> row.put(k, String.valueOf(v)));
+            out.add(row);
+        }
+        return out;
+    }
 }

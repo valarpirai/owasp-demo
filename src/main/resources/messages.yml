@@ -1,0 +1,219 @@
+sqli:
+  info:
+    explanation: "User input is concatenated directly into the SQL query string. Try: <code>' OR '1'='1</code> to dump all users, or <code>admin'--</code> to bypass password check."
+    mitigation: "Use PreparedStatements (parameterised queries). The driver escapes all input before it reaches the database engine, making injection structurally impossible."
+  badge:
+    id: "A03"
+    name: "Injection — SQL Injection"
+    tag: "SQLi"
+  title: "SQL Injection"
+  panel:
+    vulnerable: "Vulnerable — String Concatenation"
+    mitigated: "Mitigated — Prepared Statement"
+bac:
+  info:
+    explanation: "The admin endpoint returns all user data (including passwords) to any authenticated user, regardless of their role. Any logged-in user can access <code>/bac/vulnerable</code> and read sensitive records they should not see."
+    mitigation: "Enforce role-based access control on every sensitive endpoint. Check the user's role from the session on the server side — never trust the client to restrict access. Return HTTP 403 when the role check fails."
+  badge:
+    id: "A01"
+    name: "Broken Access Control"
+    tag: "Access Control"
+  title: "Broken Access Control"
+  panel:
+    vulnerable: "Vulnerable — No Role Check"
+    mitigated: "Mitigated — Role Enforced"
+crypto:
+  info:
+    explanation: "Passwords are hashed with MD5, a fast, broken algorithm. Precomputed rainbow tables can crack most MD5-hashed passwords in seconds. No salt means identical passwords produce identical hashes, enabling bulk cracking."
+    mitigation: "Use a slow, salted algorithm designed for passwords: bcrypt, scrypt, or Argon2. Never use MD5/SHA-1/SHA-256 directly for password storage. Store the salt alongside the hash and always use a unique random salt per user."
+  badge:
+    id: "A02"
+    name: "Cryptographic Failures"
+    tag: "Crypto"
+  title: "Cryptographic Failures"
+  panel:
+    vulnerable: "Vulnerable — MD5, No Salt"
+    mitigated: "Mitigated — Salted SHA-256"
+csrf:
+  info:
+    explanation: "The server trusts the session cookie alone. The browser attaches that cookie to every request for this site, even one triggered by a page the attacker controls. A hidden form on <code>evil.example</code> can post to this app and change the victim's email."
+    mitigation: "Require a secret, unpredictable token in every state-changing request and compare it with the one stored in the session. Set <code>SameSite=Lax</code> or <code>Strict</code> on the session cookie as a second layer."
+  badge:
+    id: "A01"
+    name: "Broken Access Control — Cross-Site Request Forgery (CSRF)"
+    tag: "CSRF"
+  title: "CSRF"
+  panel:
+    vulnerable: "Vulnerable — Cookie Only"
+    mitigated: "Mitigated — Anti-CSRF Token"
+xss:
+  info:
+    explanation: "The application reflects user input directly into the HTML response without encoding. An attacker can inject <code>&lt;script&gt;</code> tags or event handlers that execute in the victim's browser, stealing cookies or performing actions on their behalf."
+    mitigation: "Always HTML-encode user input before rendering it in a page. Use <code>HtmlUtils.htmlEscape()</code> or equivalent. Apply a strict Content-Security-Policy header to block inline script execution as a defence-in-depth measure."
+  badge:
+    id: "A03"
+    name: "Injection — Cross-Site Scripting (XSS)"
+    tag: "XSS"
+  title: "XSS"
+  panel:
+    vulnerable: "Vulnerable — Raw Reflection"
+    mitigated: "Mitigated — HTML Encoding"
+rce:
+  info:
+    explanation: "User input is concatenated into a shell command string and passed to <code>sh -c</code>. An attacker appends <code>; ls</code> or <code>&& cat /etc/passwd</code> to run arbitrary OS commands with the server's privileges."
+    mitigation: "Never pass user input to a shell. Use <code>ProcessBuilder</code> with a pre-split argument array — each argument is a separate element, so no shell interpretation occurs. Validate the input against a strict allowlist regex before use."
+  badge:
+    id: "A03"
+    name: "Injection — OS Command (RCE)"
+    tag: "RCE"
+  title: "Remote Code Execution"
+  panel:
+    vulnerable: "Vulnerable — Shell Injection"
+    mitigated: "Mitigated — ProcessBuilder + Allowlist"
+insecure-design:
+  info:
+    explanation: "No rate limit or attempt counter exists on the OTP check endpoint. An attacker can script thousands of guesses per second to brute-force a 6-digit OTP in under a minute."
+    mitigation: "Enforce a per-session attempt limit (e.g. 5 attempts). Lock the flow after the limit is exceeded and require re-authentication or a cooldown period. The limit is configurable in <code>application.yml</code> under <code>otp.max_attempts</code>."
+  badge:
+    id: "A04"
+    name: "Insecure Design"
+    tag: "Design"
+  title: "Insecure Design"
+  panel:
+    vulnerable: "Vulnerable — No Rate Limit"
+    mitigated: "Mitigated — Attempt Counter"
+misconfig:
+  info:
+    explanation: "The application exposes full stack traces, internal class names, file paths, and database connection strings to the browser on error. This gives attackers a detailed map of the application internals to plan further attacks."
+    mitigation: "Return generic error pages to clients (HTTP 500 with no internal details). Log the full exception server-side only. Disable debug/verbose error modes in production. Scan for exposed admin consoles (e.g. H2 web console, Actuator endpoints)."
+  badge:
+    id: "A05"
+    name: "Security Misconfiguration"
+    tag: "Misconfig"
+  title: "Security Misconfiguration"
+  panel:
+    vulnerable: "Vulnerable — Stack Trace Exposed"
+    mitigated: "Mitigated — Generic Error Page"
+vuln-components:
+  info:
+    explanation: "Applications that use components with known public CVEs inherit those vulnerabilities. Most supply-chain attacks exploit unpatched transitive dependencies that developers are not even aware of."
+    mitigation: "Maintain an SBOM (software bill of materials). Run <code>dependency-check</code> or GitHub Dependabot in CI. Subscribe to CVE feeds for your runtime and framework. Pin versions and upgrade regularly."
+  badge:
+    id: "A06"
+    name: "Vulnerable & Outdated Components"
+    tag: "Components"
+  title: "Vulnerable Components"
+auth-failures:
+  info:
+    explanation: "No account lockout and predictable session tokens. An attacker can brute-force credentials without limit, and if they can observe token generation they can predict or forge valid session tokens for other users."
+    mitigation: "Implement account lockout or exponential back-off after N failed attempts. Generate session tokens using a CSPRNG (e.g. <code>UUID.randomUUID()</code>). Lockout thresholds are configurable in <code>application.yml</code>."
+  badge:
+    id: "A07"
+    name: "Identification & Authentication Failures"
+    tag: "Auth"
+  title: "Auth Failures"
+  panel:
+    vulnerable: "Vulnerable — No Lockout, Weak Token"
+    mitigated: "Mitigated — Lockout + UUID Token"
+integrity:
+  info:
+    explanation: "The application deserialises Base64-encoded payloads from the client without any integrity verification. An attacker can craft a payload granting themselves admin privileges and the server will blindly accept it."
+    mitigation: "Sign the payload with an HMAC-SHA256 key known only to the server. Verify the signature before processing. Reject any payload where the signature does not match. Never trust client-supplied data for privilege decisions."
+  badge:
+    id: "A08"
+    name: "Software & Data Integrity Failures"
+    tag: "Integrity"
+  title: "Data Integrity Failures"
+  panel:
+    vulnerable: "Vulnerable — No Integrity Check"
+    mitigated: "Mitigated — HMAC Signature Verified"
+logging:
+  info:
+    explanation: "Failed login attempts are silently discarded. Without logs, a security team cannot detect ongoing brute-force attacks, credential stuffing, or account takeovers until it is too late."
+    mitigation: "Log all authentication events (success and failure) with timestamp, username, and source IP. Store logs in a tamper-evident system. Alert on unusual failure rates. The audit log table in this demo shows live entries below."
+  badge:
+    id: "A09"
+    name: "Security Logging & Monitoring Failures"
+    tag: "Logging"
+  title: "Logging Failures"
+  panel:
+    vulnerable: "Vulnerable — Silent Failure"
+    mitigated: "Mitigated — Audit Logged"
+ssrf:
+  info:
+    explanation: "The server fetches any URL provided by the user. An attacker can supply internal addresses like <code>http://169.254.169.254/latest/meta-data/</code> (cloud metadata) or <code>http://localhost:8080/admin</code> to access services not exposed externally."
+    mitigation: "Validate URLs against a strict allowlist of approved domains/prefixes before fetching. Block private IP ranges and loopback addresses. The allowlist is configurable in <code>application.yml</code> under <code>ssrf.allowlist</code>."
+  badge:
+    id: "A10"
+    name: "Server-Side Request Forgery (SSRF)"
+    tag: "SSRF"
+  title: "SSRF"
+  panel:
+    vulnerable: "Vulnerable — Fetch Any URL"
+    mitigated: "Mitigated — Allowlist Enforced"
+cards:
+  - id: "A01"
+    tag: "Access Control"
+    name: "Broken Access Control"
+    path: "/bac"
+    description: "Restrictions on authenticated users are not properly enforced."
+  - id: "A01"
+    tag: "CSRF"
+    name: "Cross-Site Request Forgery"
+    path: "/csrf"
+    description: "A forged request rides on the victim's session cookie to change state."
+  - id: "A02"
+    tag: "Crypto"
+    name: "Cryptographic Failures"
+    path: "/crypto"
+    description: "Sensitive data exposed due to weak or missing cryptography."
+  - id: "A03"
+    tag: "SQLi"
+    name: "Injection"
+    path: "/sqli"
+    description: "Hostile data is sent to an interpreter as part of a query or command."
+  - id: "A03"
+    tag: "XSS"
+    name: "Cross-Site Scripting"
+    path: "/xss"
+    description: "Untrusted input is reflected into a page and runs as script in the victim's browser."
+  - id: "A03"
+    tag: "RCE"
+    name: "OS Command Injection"
+    path: "/rce"
+    description: "User input concatenated into a shell command executes arbitrary OS commands."
+  - id: "A04"
+    tag: "Design"
+    name: "Insecure Design"
+    path: "/insecure-design"
+    description: "Missing or ineffective control design allows abuse of business logic."
+  - id: "A05"
+    tag: "Misconfig"
+    name: "Security Misconfiguration"
+    path: "/misconfig"
+    description: "Insecure default configs, verbose errors, or unnecessary features enabled."
+  - id: "A06"
+    tag: "Components"
+    name: "Vulnerable Components"
+    path: "/vuln-components"
+    description: "Components with known vulnerabilities used without patching."
+  - id: "A07"
+    tag: "Auth"
+    name: "Auth Failures"
+    path: "/auth-failures"
+    description: "Weaknesses in authentication allow account compromise."
+  - id: "A08"
+    tag: "Integrity"
+    name: "Data Integrity Failures"
+    path: "/integrity"
+    description: "Code and data integrity failures, insecure deserialization."
+  - id: "A09"
+    tag: "Logging"
+    name: "Logging & Monitoring Failures"
+    path: "/logging"
+    description: "Insufficient logging prevents detection of active breaches."
+  - id: "A10"
+    tag: "SSRF"
+    name: "SSRF"
+    path: "/ssrf"
+    description: "Server fetches a remote resource from an attacker-controlled URL."

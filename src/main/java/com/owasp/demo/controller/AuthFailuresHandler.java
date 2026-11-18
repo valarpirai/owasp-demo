@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.model.User;
 import com.owasp.demo.repository.UserRepository;
@@ -91,12 +92,8 @@ public class AuthFailuresHandler implements IRouteHandler {
 
     private void renderPage(HttpServletResponse res, String vulnResult, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "No account lockout and predictable session tokens. An attacker can brute-force " +
-            "credentials without limit, and if they can observe token generation they can predict " +
-            "or forge valid session tokens for other users.",
-            "Implement account lockout or exponential back-off after N failed attempts. " +
-            "Generate session tokens using a CSPRNG (e.g. <code>UUID.randomUUID()</code>). " +
-            "Lockout thresholds are configurable in <code>application.yml</code>."
+            Messages.get("auth-failures.info.explanation"),
+            Messages.get("auth-failures.info.mitigation")
         );
 
         String vulnForm = """
@@ -122,9 +119,9 @@ public class AuthFailuresHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — No Lockout, Weak Token", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("auth-failures.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(vulnResult, false) : ""),
-                TemplateEngine.demoPanel("Mitigated — Lockout + UUID Token", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("auth-failures.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
@@ -141,7 +138,7 @@ public class AuthFailuresHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'JSESSIONID=SESSION' -d 'username=admin&password=admin123' | grep -o 'token.*</code>'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A07", "Identification & Authentication Failures", "Auth") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Auth Failures", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("auth-failures.badge.id"), Messages.get("auth-failures.badge.name"), Messages.get("auth-failures.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("auth-failures.title"), content, true));
     }
 }

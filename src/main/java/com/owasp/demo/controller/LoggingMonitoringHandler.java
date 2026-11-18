@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.model.AuditLog;
 import com.owasp.demo.model.User;
 import com.owasp.demo.repository.AuditLogRepository;
@@ -69,12 +70,8 @@ public class LoggingMonitoringHandler implements IRouteHandler {
 
     private void renderPage(HttpServletResponse res, String vulnResult, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "Failed login attempts are silently discarded. Without logs, a security team " +
-            "cannot detect ongoing brute-force attacks, credential stuffing, or account takeovers " +
-            "until it is too late.",
-            "Log all authentication events (success and failure) with timestamp, username, and " +
-            "source IP. Store logs in a tamper-evident system. Alert on unusual failure rates. " +
-            "The audit log table in this demo shows live entries below."
+            Messages.get("logging.info.explanation"),
+            Messages.get("logging.info.mitigation")
         );
 
         String vulnForm = """
@@ -106,9 +103,9 @@ public class LoggingMonitoringHandler implements IRouteHandler {
               %s
             </div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — Silent Failure", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("logging.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(vulnResult, false) : ""),
-                TemplateEngine.demoPanel("Mitigated — Audit Logged", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("logging.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : ""),
                 auditTable
             );
@@ -125,8 +122,8 @@ public class LoggingMonitoringHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode $'username=admin\\nLOGIN_SUCCESS user=attacker' -d 'password=x'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A09", "Security Logging & Monitoring Failures", "Logging") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Logging Failures", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("logging.badge.id"), Messages.get("logging.badge.name"), Messages.get("logging.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("logging.title"), content, true));
     }
 
     private String buildAuditTable() {

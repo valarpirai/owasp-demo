@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.model.User;
 import com.owasp.demo.repository.UserRepository;
 import com.owasp.demo.view.TemplateEngine;
@@ -84,12 +85,8 @@ public class BrokenAccessHandler implements IRouteHandler {
 
     private void renderPage(HttpServletResponse res, String vulnResult, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "The admin endpoint returns all user data (including passwords) to any authenticated user, " +
-            "regardless of their role. Any logged-in user can access <code>/bac/vulnerable</code> and " +
-            "read sensitive records they should not see.",
-            "Enforce role-based access control on every sensitive endpoint. Check the user's role " +
-            "from the session on the server side — never trust the client to restrict access. " +
-            "Return HTTP 403 when the role check fails."
+            Messages.get("bac.info.explanation"),
+            Messages.get("bac.info.mitigation")
         );
 
         String vulnBtn = """
@@ -112,8 +109,8 @@ public class BrokenAccessHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — No Role Check", "red", vulnBtn, ""),
-                TemplateEngine.demoPanel("Mitigated — Role Enforced", "green", safeBtn, "")
+                TemplateEngine.demoPanel(Messages.get("bac.panel.vulnerable"), "red", vulnBtn, ""),
+                TemplateEngine.demoPanel(Messages.get("bac.panel.mitigated"), "green", safeBtn, "")
             );
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
@@ -131,7 +128,7 @@ public class BrokenAccessHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/bac/mitigated -b 'JSESSIONID=SESSION' -d 'role=ADMIN'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control", "Access Control") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Broken Access Control", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("bac.badge.id"), Messages.get("bac.badge.name"), Messages.get("bac.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("bac.title"), content, true));
     }
 }

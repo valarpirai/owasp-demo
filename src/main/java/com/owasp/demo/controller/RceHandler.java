@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
@@ -85,12 +86,8 @@ public class RceHandler implements IRouteHandler {
                             String vulnInput, String vulnResult,
                             String safeInput, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "User input is concatenated into a shell command string and passed to <code>sh -c</code>. " +
-            "An attacker appends <code>; ls</code> or <code>&& cat /etc/passwd</code> to run " +
-            "arbitrary OS commands with the server's privileges.",
-            "Never pass user input to a shell. Use <code>ProcessBuilder</code> with a pre-split " +
-            "argument array — each argument is a separate element, so no shell interpretation occurs. " +
-            "Validate the input against a strict allowlist regex before use."
+            Messages.get("rce.info.explanation"),
+            Messages.get("rce.info.mitigation")
         );
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
@@ -132,17 +129,17 @@ public class RceHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — Shell Injection", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("rce.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(
                         "<pre class='text-xs overflow-auto whitespace-pre-wrap'>" +
                         TemplateEngine.escape(vulnResult) + "</pre>", false) : ""),
-                TemplateEngine.demoPanel("Mitigated — ProcessBuilder + Allowlist", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("rce.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(
                         "<pre class='text-xs overflow-auto whitespace-pre-wrap'>" +
                         TemplateEngine.escape(safeResult) + "</pre>", true) : "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — OS Command (RCE)", "RCE") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Remote Code Execution", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("rce.badge.id"), Messages.get("rce.badge.name"), Messages.get("rce.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("rce.title"), content, true));
     }
 }

@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,12 +49,8 @@ public class SecurityMisconfigHandler implements IRouteHandler {
 
     private void renderPage(HttpServletResponse res, String vulnResult, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "The application exposes full stack traces, internal class names, file paths, and " +
-            "database connection strings to the browser on error. This gives attackers a detailed " +
-            "map of the application internals to plan further attacks.",
-            "Return generic error pages to clients (HTTP 500 with no internal details). " +
-            "Log the full exception server-side only. Disable debug/verbose error modes in production. " +
-            "Scan for exposed admin consoles (e.g. H2 web console, Actuator endpoints)."
+            Messages.get("misconfig.info.explanation"),
+            Messages.get("misconfig.info.mitigation")
         );
 
         String vulnBtn = """
@@ -75,8 +72,8 @@ public class SecurityMisconfigHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — Stack Trace Exposed", "red", vulnBtn, ""),
-                TemplateEngine.demoPanel("Mitigated — Generic Error Page", "green", safeBtn, "")
+                TemplateEngine.demoPanel(Messages.get("misconfig.panel.vulnerable"), "red", vulnBtn, ""),
+                TemplateEngine.demoPanel(Messages.get("misconfig.panel.mitigated"), "green", safeBtn, "")
             );
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
@@ -94,7 +91,7 @@ public class SecurityMisconfigHandler implements IRouteHandler {
              "curl -s http://localhost:8090/h2-console/login.do -X POST -d 'url=jdbc:h2:mem:owaspdb&user=sa&password='"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A05", "Security Misconfiguration", "Misconfig") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Security Misconfiguration", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("misconfig.badge.id"), Messages.get("misconfig.badge.name"), Messages.get("misconfig.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("misconfig.title"), content, true));
     }
 }

@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
@@ -146,12 +147,8 @@ public class SsrfHandler implements IRouteHandler {
         List<String> allowlist = AppConfig.get().getSsrfAllowlist();
 
         String info = TemplateEngine.infoBox(
-            "The server fetches any URL provided by the user. An attacker can supply internal " +
-            "addresses like <code>http://169.254.169.254/latest/meta-data/</code> (cloud metadata) " +
-            "or <code>http://localhost:8080/admin</code> to access services not exposed externally.",
-            "Validate URLs against a strict allowlist of approved domains/prefixes before fetching. " +
-            "Block private IP ranges and loopback addresses. The allowlist is configurable in " +
-            "<code>application.yml</code> under <code>ssrf.allowlist</code>."
+            Messages.get("ssrf.info.explanation"),
+            Messages.get("ssrf.info.mitigation")
         );
 
         String vulnForm = """
@@ -180,9 +177,9 @@ public class SsrfHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — Fetch Any URL", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("ssrf.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(vulnResult, false) : ""),
-                TemplateEngine.demoPanel("Mitigated — Allowlist Enforced", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("ssrf.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
@@ -201,7 +198,7 @@ public class SsrfHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'url=file:///etc/passwd'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A10", "Server-Side Request Forgery (SSRF)", "SSRF") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("SSRF", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("ssrf.badge.id"), Messages.get("ssrf.badge.name"), Messages.get("ssrf.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("ssrf.title"), content, true));
     }
 }

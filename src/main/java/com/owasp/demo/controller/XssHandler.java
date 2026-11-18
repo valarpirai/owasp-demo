@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,12 +36,8 @@ public class XssHandler implements IRouteHandler {
                             String vulnInput, String vulnOutput,
                             String safeInput, String safeOutput) throws IOException {
         String info = TemplateEngine.infoBox(
-            "The application reflects user input directly into the HTML response without encoding. " +
-            "An attacker can inject <code>&lt;script&gt;</code> tags or event handlers that execute " +
-            "in the victim's browser, stealing cookies or performing actions on their behalf.",
-            "Always HTML-encode user input before rendering it in a page. Use " +
-            "<code>HtmlUtils.htmlEscape()</code> or equivalent. Apply a strict Content-Security-Policy " +
-            "header to block inline script execution as a defence-in-depth measure."
+            Messages.get("xss.info.explanation"),
+            Messages.get("xss.info.mitigation")
         );
 
         String xssPayload = "<script>alert('XSS')</script>";
@@ -87,8 +84,8 @@ public class XssHandler implements IRouteHandler {
               %s
             </div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — Raw Reflection", "red", vulnForm, ""),
-                TemplateEngine.demoPanel("Mitigated — HTML Encoding", "green", safeForm, "")
+                TemplateEngine.demoPanel(Messages.get("xss.panel.vulnerable"), "red", vulnForm, ""),
+                TemplateEngine.demoPanel(Messages.get("xss.panel.mitigated"), "green", safeForm, "")
             );
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
@@ -106,7 +103,7 @@ public class XssHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>fetch('/logout')</script>\""},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — Cross-Site Scripting (XSS)", "XSS") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("XSS", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("xss.badge.id"), Messages.get("xss.badge.name"), Messages.get("xss.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("xss.title"), content, true));
     }
 }

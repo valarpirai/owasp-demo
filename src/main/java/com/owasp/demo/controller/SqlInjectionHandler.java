@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.model.User;
 import com.owasp.demo.repository.UserRepository;
 import com.owasp.demo.view.TemplateEngine;
@@ -89,11 +90,8 @@ public class SqlInjectionHandler implements IRouteHandler {
                             String vulnInput, String vulnResult,
                             String safeInput, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "User input is concatenated directly into the SQL query string. " +
-            "Try: <code>' OR '1'='1</code> to dump all users, or " +
-            "<code>admin'--</code> to bypass password check.",
-            "Use PreparedStatements (parameterised queries). The driver escapes all input " +
-            "before it reaches the database engine, making injection structurally impossible."
+            Messages.get("sqli.info.explanation"),
+            Messages.get("sqli.info.mitigation")
         );
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
@@ -134,13 +132,13 @@ public class SqlInjectionHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — String Concatenation", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("sqli.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(vulnResult, false) : ""),
-                TemplateEngine.demoPanel("Mitigated — Prepared Statement", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("sqli.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — SQL Injection", "SQLi") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("SQL Injection", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("sqli.badge.id"), Messages.get("sqli.badge.name"), Messages.get("sqli.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("sqli.title"), content, true));
     }
 }

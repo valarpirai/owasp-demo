@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
@@ -83,12 +84,8 @@ public class DataIntegrityHandler implements IRouteHandler {
 
     private void renderPage(HttpServletResponse res, String vulnResult, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "The application deserialises Base64-encoded payloads from the client without any " +
-            "integrity verification. An attacker can craft a payload granting themselves admin " +
-            "privileges and the server will blindly accept it.",
-            "Sign the payload with an HMAC-SHA256 key known only to the server. Verify the " +
-            "signature before processing. Reject any payload where the signature does not match. " +
-            "Never trust client-supplied data for privilege decisions."
+            Messages.get("integrity.info.explanation"),
+            Messages.get("integrity.info.mitigation")
         );
 
         String sample = samplePayload();
@@ -125,9 +122,9 @@ public class DataIntegrityHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — No Integrity Check", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("integrity.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(vulnResult, false) : ""),
-                TemplateEngine.demoPanel("Mitigated — HMAC Signature Verified", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("integrity.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
@@ -143,7 +140,7 @@ public class DataIntegrityHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/integrity/mitigated -b 'JSESSIONID=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9&sig=invalidsignature'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A08", "Software & Data Integrity Failures", "Integrity") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Data Integrity Failures", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("integrity.badge.id"), Messages.get("integrity.badge.name"), Messages.get("integrity.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("integrity.title"), content, true));
     }
 }

@@ -1,32 +1,22 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.List;
 
 public class IndexHandler implements IRouteHandler {
 
     private record VulnCard(String id, String tag, String name, String path, String description) {}
 
-    /** Cards are listed in OWASP ID order. */
-    private static final VulnCard[] CARDS = {
-        new VulnCard("A01", "Access Control", "Broken Access Control",        "/bac",             "Restrictions on authenticated users are not properly enforced."),
-        new VulnCard("A01", "CSRF",           "Cross-Site Request Forgery",   "/csrf",            "A forged request rides on the victim's session cookie to change state."),
-        new VulnCard("A02", "Crypto",         "Cryptographic Failures",       "/crypto",          "Sensitive data exposed due to weak or missing cryptography."),
-        new VulnCard("A03", "SQLi",           "Injection",                    "/sqli",            "Hostile data is sent to an interpreter as part of a query or command."),
-        new VulnCard("A03", "XSS",            "Cross-Site Scripting",         "/xss",             "Untrusted input is reflected into a page and runs as script in the victim's browser."),
-        new VulnCard("A03", "RCE",            "OS Command Injection",         "/rce",             "User input concatenated into a shell command executes arbitrary OS commands."),
-        new VulnCard("A04", "Design",         "Insecure Design",              "/insecure-design", "Missing or ineffective control design allows abuse of business logic."),
-        new VulnCard("A05", "Misconfig",      "Security Misconfiguration",    "/misconfig",       "Insecure default configs, verbose errors, or unnecessary features enabled."),
-        new VulnCard("A06", "Components",     "Vulnerable Components",        "/vuln-components", "Components with known vulnerabilities used without patching."),
-        new VulnCard("A07", "Auth",           "Auth Failures",                "/auth-failures",   "Weaknesses in authentication allow account compromise."),
-        new VulnCard("A08", "Integrity",      "Data Integrity Failures",      "/integrity",       "Code and data integrity failures, insecure deserialization."),
-        new VulnCard("A09", "Logging",        "Logging & Monitoring Failures","/logging",         "Insufficient logging prevents detection of active breaches."),
-        new VulnCard("A10", "SSRF",           "SSRF",                         "/ssrf",            "Server fetches a remote resource from an attacker-controlled URL.")
-    };
+    /** Cards are read from messages.yml, in list order. */
+    private static final List<VulnCard> CARDS = Messages.getList("cards").stream()
+        .map(c -> new VulnCard(c.get("id"), c.get("tag"), c.get("name"), c.get("path"), c.get("description")))
+        .toList();
 
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {

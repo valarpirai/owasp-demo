@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.config.AppConfig;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,11 +65,8 @@ public class InsecureDesignHandler implements IRouteHandler {
 
     private void renderPage(HttpServletResponse res, String vulnResult, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "No rate limit or attempt counter exists on the OTP check endpoint. An attacker can " +
-            "script thousands of guesses per second to brute-force a 6-digit OTP in under a minute.",
-            "Enforce a per-session attempt limit (e.g. 5 attempts). Lock the flow after the limit " +
-            "is exceeded and require re-authentication or a cooldown period. The limit is configurable " +
-            "in <code>application.yml</code> under <code>otp.max_attempts</code>."
+            Messages.get("insecure-design.info.explanation"),
+            Messages.get("insecure-design.info.mitigation")
         );
 
         String hint = "<p class='text-xs text-gray-500 mt-2'>Hint: the OTP is <code>123456</code>. " +
@@ -95,9 +93,9 @@ public class InsecureDesignHandler implements IRouteHandler {
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — No Rate Limit", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("insecure-design.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(vulnResult, false) : ""),
-                TemplateEngine.demoPanel("Mitigated — Attempt Counter", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("insecure-design.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
@@ -113,7 +111,7 @@ public class InsecureDesignHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'JSESSIONID=SESSION' -d 'otp=111111'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A04", "Insecure Design", "Design") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Insecure Design", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("insecure-design.badge.id"), Messages.get("insecure-design.badge.name"), Messages.get("insecure-design.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("insecure-design.title"), content, true));
     }
 }

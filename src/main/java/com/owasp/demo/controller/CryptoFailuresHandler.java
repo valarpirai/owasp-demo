@@ -1,5 +1,6 @@
 package com.owasp.demo.controller;
 
+import com.owasp.demo.util.Messages;
 import com.owasp.demo.view.TemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -70,12 +71,8 @@ public class CryptoFailuresHandler implements IRouteHandler {
                             String vulnInput, String vulnResult,
                             String safeInput, String safeResult) throws IOException {
         String info = TemplateEngine.infoBox(
-            "Passwords are hashed with MD5, a fast, broken algorithm. Precomputed rainbow tables " +
-            "can crack most MD5-hashed passwords in seconds. No salt means identical passwords " +
-            "produce identical hashes, enabling bulk cracking.",
-            "Use a slow, salted algorithm designed for passwords: bcrypt, scrypt, or Argon2. " +
-            "Never use MD5/SHA-1/SHA-256 directly for password storage. Store the salt alongside " +
-            "the hash and always use a unique random salt per user."
+            Messages.get("crypto.info.explanation"),
+            Messages.get("crypto.info.mitigation")
         );
 
         String vulnForm = """
@@ -104,9 +101,9 @@ public class CryptoFailuresHandler implements IRouteHandler {
               %s
             </div>
             """.formatted(
-                TemplateEngine.demoPanel("Vulnerable — MD5, No Salt", "red", vulnForm,
+                TemplateEngine.demoPanel(Messages.get("crypto.panel.vulnerable"), "red", vulnForm,
                     vulnResult != null ? TemplateEngine.resultBox(vulnResult, false) : ""),
-                TemplateEngine.demoPanel("Mitigated — Salted SHA-256", "green", safeForm,
+                TemplateEngine.demoPanel(Messages.get("crypto.panel.mitigated"), "green", safeForm,
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
@@ -122,7 +119,7 @@ public class CryptoFailuresHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/crypto/vulnerable -b 'JSESSIONID=SESSION' -d 'password='"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A02", "Cryptographic Failures", "Crypto") + info + exploits + panels;
-        res.getWriter().write(TemplateEngine.page("Cryptographic Failures", content, true));
+        String content = TemplateEngine.vulnerabilityBadge(Messages.get("crypto.badge.id"), Messages.get("crypto.badge.name"), Messages.get("crypto.badge.tag")) + info + exploits + panels;
+        res.getWriter().write(TemplateEngine.page(Messages.get("crypto.title"), content, true));
     }
 }
