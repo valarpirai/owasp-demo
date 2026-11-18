@@ -8,21 +8,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-public class SecurityMisconfigHandler implements IRouteHandler {
+@Controller
+public class SecurityMisconfigHandler {
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("/misconfig/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("/misconfig/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null);
-        }
+    @GetMapping("/misconfig")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null);
     }
 
+    @GetMapping("/misconfig/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         try {
             throw new RuntimeException("DB connection failed: jdbc:h2:mem:owaspdb;user=sa;password=");
@@ -40,6 +34,7 @@ public class SecurityMisconfigHandler implements IRouteHandler {
         }
     }
 
+    @GetMapping("/misconfig/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String result =
             "<strong class='text-gray-700'>500 Internal Server Error</strong><br/>" +

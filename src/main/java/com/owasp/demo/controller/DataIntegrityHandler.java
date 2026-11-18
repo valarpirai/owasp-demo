@@ -13,23 +13,17 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public class DataIntegrityHandler implements IRouteHandler {
+@Controller
+public class DataIntegrityHandler {
 
     private static final String HMAC_SECRET = AppConfig.get().getHmacSecret();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/integrity/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/integrity/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null);
-        }
+    @GetMapping("/integrity")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null);
     }
 
+    @PostMapping("/integrity/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String payload = req.getParameter("payload");
         String result;
@@ -46,6 +40,7 @@ public class DataIntegrityHandler implements IRouteHandler {
         renderPage(res, result, null);
     }
 
+    @PostMapping("/integrity/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String payload = req.getParameter("payload2");
         String signature = req.getParameter("sig");

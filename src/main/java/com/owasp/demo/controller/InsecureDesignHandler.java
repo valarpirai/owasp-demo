@@ -11,23 +11,17 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class InsecureDesignHandler implements IRouteHandler {
+@Controller
+public class InsecureDesignHandler {
 
     private static final String CORRECT_OTP = AppConfig.get().getString("otp.correct_code");
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/insecure-design/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/insecure-design/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null);
-        }
+    @GetMapping("/insecure-design")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null);
     }
 
+    @PostMapping("/insecure-design/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String otp = req.getParameter("otp");
         String result = CORRECT_OTP.equals(otp)
@@ -36,6 +30,7 @@ public class InsecureDesignHandler implements IRouteHandler {
         renderPage(res, result, null);
     }
 
+    @PostMapping("/insecure-design/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         HttpSession session = req.getSession(true);
         AtomicInteger counter = (AtomicInteger) session.getAttribute("otp_attempts");

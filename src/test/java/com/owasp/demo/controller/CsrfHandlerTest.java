@@ -49,7 +49,7 @@ class CsrfHandlerTest {
     void vulnerableEndpoint_changesEmailWithoutToken() throws Exception {
         post("/csrf/vulnerable", "attacker@evil.example", null);
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         assertEquals("attacker@evil.example", attrs.get("csrfEmailVulnerable"));
     }
@@ -59,7 +59,7 @@ class CsrfHandlerTest {
         attrs.put("csrfToken", "secret");
         post("/csrf/mitigated", "attacker@evil.example", null);
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(res).setStatus(403);
         assertNull(attrs.get("csrfEmailMitigated"));
@@ -70,7 +70,7 @@ class CsrfHandlerTest {
         attrs.put("csrfToken", "secret");
         post("/csrf/mitigated", "attacker@evil.example", "guess");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(res).setStatus(403);
         assertNull(attrs.get("csrfEmailMitigated"));
@@ -81,7 +81,7 @@ class CsrfHandlerTest {
         attrs.put("csrfToken", "secret");
         post("/csrf/mitigated", "bob@example.com", "secret");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         assertEquals("bob@example.com", attrs.get("csrfEmailMitigated"));
     }
@@ -91,7 +91,7 @@ class CsrfHandlerTest {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn("/csrf");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String token = (String) attrs.get("csrfToken");
         assertNotNull(token);
@@ -104,7 +104,7 @@ class CsrfHandlerTest {
         when(req.getPathInfo()).thenReturn("/csrf/attack");
         when(req.getParameter("target")).thenReturn("\"><script>x</script>");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("action=\"/csrf/vulnerable\""));

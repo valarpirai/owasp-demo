@@ -41,7 +41,7 @@ class BrokenAccessHandlerTest {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn("/bac/vulnerable");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         // Password hashes are visible in the vulnerable response. Clear text is not stored.
@@ -57,7 +57,7 @@ class BrokenAccessHandlerTest {
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("role")).thenReturn("ADMIN");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         // No passwords in the safe response — only username and role
@@ -74,7 +74,7 @@ class BrokenAccessHandlerTest {
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("role")).thenReturn("USER");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("403"));

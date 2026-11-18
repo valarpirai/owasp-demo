@@ -9,7 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-public class IndexHandler implements IRouteHandler {
+@Controller
+public class IndexHandler {
 
     private record VulnCard(String id, String tag, String name, String path, String description) {}
 
@@ -18,7 +19,7 @@ public class IndexHandler implements IRouteHandler {
         .map(c -> new VulnCard(c.get("id"), c.get("tag"), c.get("name"), c.get("path"), c.get("description")))
         .toList();
 
-    @Override
+    @GetMapping("/")
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
         HttpSession session = req.getSession(false);
         String user = session != null ? (String) session.getAttribute("user") : "?";

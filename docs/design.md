@@ -42,7 +42,7 @@ com.owasp.demo/
 
 ## Routes
 
-All routes go through `AppServlet`. It reads `req.getPathInfo()` and matches `"METHOD /path"`.
+All routes go through `AppServlet`. It reads `req.getPathInfo()` and matches `"METHOD /path"`. `RouteRegistry` fills the table at startup. ClassGraph scans `com.owasp.demo.controller` for `@Controller` classes. Each `@GetMapping` or `@PostMapping` method becomes one route. Paths are exact. There are no path variables.
 
 ```
 GET  /                           dashboard

@@ -4,14 +4,14 @@ Follow these rules for every new demo. `CsrfHandler` is the reference.
 
 ## Shape
 
-- One handler per demo, in `controller/`, implementing `IRouteHandler`.
+- One handler per demo, in `controller/`, annotated `@Controller`.
 - Routes: `GET /foo` (page), `POST /foo/vulnerable`, `POST /foo/mitigated`.
 - Read the path with `req.getPathInfo()`. Never `getServletPath()`.
 - Every demo has a vulnerable side and a mitigated side. No exceptions.
 
 ## Wiring
 
-1. Register every route in the `AppServlet` constructor.
+1. Annotate every route method with `@GetMapping` or `@PostMapping`. The classpath scan registers them.
 2. Add a card to the `cards:` list in `messages.yml`, in OWASP ID order.
 3. Add a row to the table in `README.md`.
 4. Add the routes to `docs/design.md`.

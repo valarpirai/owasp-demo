@@ -34,7 +34,7 @@ class InsecureDesignHandlerTest {
         when(req.getPathInfo()).thenReturn("/insecure-design/vulnerable");
         when(req.getParameter("otp")).thenReturn("123456");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         assertTrue(responseBody.toString().contains("Access granted"));
     }
@@ -45,7 +45,7 @@ class InsecureDesignHandlerTest {
         when(req.getPathInfo()).thenReturn("/insecure-design/vulnerable");
         when(req.getParameter("otp")).thenReturn("000000");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("Wrong OTP"));
@@ -61,7 +61,7 @@ class InsecureDesignHandlerTest {
         when(req.getSession(true)).thenReturn(session);
         when(session.getAttribute("otp_attempts")).thenReturn(counter);
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         assertTrue(responseBody.toString().contains("locked"));
     }
@@ -76,7 +76,7 @@ class InsecureDesignHandlerTest {
         when(req.getSession(true)).thenReturn(session);
         when(session.getAttribute("otp_attempts")).thenReturn(counter);
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(session).removeAttribute("otp_attempts");
         assertTrue(responseBody.toString().contains("Access granted"));

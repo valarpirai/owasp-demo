@@ -13,34 +13,28 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-public class LoginHandler implements IRouteHandler {
+@Controller
+public class LoginHandler {
 
     private final UserRepository userRepository = new UserRepository();
     private final SessionRepository sessionRepository = new SessionRepository();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("GET".equals(req.getMethod()) && "/logout".equals(path)) {
-            HttpSession session = req.getSession(false);
-            if (session != null) {
-                try {
-                    sessionRepository.delete(session.getId());
-                } catch (Exception ignored) {
-                    // The cookie is invalidated below either way.
-                }
-                session.invalidate();
+    @GetMapping("/logout")
+    public void logout(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        HttpSession session = req.getSession(false);
+        if (session != null) {
+            try {
+                sessionRepository.delete(session.getId());
+            } catch (Exception ignored) {
+                // The cookie is invalidated below either way.
             }
-            res.sendRedirect("/login");
-            return;
+            session.invalidate();
         }
+        res.sendRedirect("/login");
+    }
 
-        if ("POST".equals(req.getMethod())) {
-            handlePost(req, res);
-            return;
-        }
-
+    @GetMapping("/login")
+    public void loginPage(HttpServletRequest req, HttpServletResponse res) throws IOException {
         HttpSession existing = req.getSession(false);
         if (existing != null && existing.getAttribute("user") != null) {
             // Another tab already logged in. Same cookie, same session.
@@ -50,6 +44,7 @@ public class LoginHandler implements IRouteHandler {
         renderLogin(res, null);
     }
 
+    @PostMapping("/login")
     private void handlePost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");

@@ -25,7 +25,8 @@ import java.util.regex.Pattern;
  * so this page cannot trigger it. It reports whether this JVM and CPU match the advisory's
  * conditions, and shows an unchecked decode endpoint next to a validated one.
  */
-public class Java4ShellHandler implements IRouteHandler {
+@Controller
+public class Java4ShellHandler {
 
     private static final Pattern STRICT_BASE64 = Pattern.compile("[A-Za-z0-9+/]*={0,2}");
 
@@ -33,18 +34,21 @@ public class Java4ShellHandler implements IRouteHandler {
     private final int maxChars = cfg.getInt("java4shell.max_input_chars");
     private final int previewBytes = cfg.getInt("java4shell.preview_bytes");
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-        if ("POST".equals(req.getMethod()) && "/java4shell/vulnerable".equals(path)) {
-            String data = param(req, "data");
-            renderPage(res, data, decode(data), null, null);
-        } else if ("POST".equals(req.getMethod()) && "/java4shell/mitigated".equals(path)) {
-            String data = param(req, "data2");
-            renderPage(res, null, null, data, decodeValidated(data));
-        } else {
-            renderPage(res, null, null, null, null);
-        }
+    @GetMapping("/java4shell")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null, null, null);
+    }
+
+    @PostMapping("/java4shell/vulnerable")
+    public void vulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String data = param(req, "data");
+        renderPage(res, data, decode(data), null, null);
+    }
+
+    @PostMapping("/java4shell/mitigated")
+    public void mitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String data = param(req, "data2");
+        renderPage(res, null, null, data, decodeValidated(data));
     }
 
     private String param(HttpServletRequest req, String name) {

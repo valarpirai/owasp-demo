@@ -12,23 +12,17 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.List;
 
-public class BrokenAccessHandler implements IRouteHandler {
+@Controller
+public class BrokenAccessHandler {
 
     private final UserRepository userRepository = new UserRepository();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("/bac/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("/bac/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null);
-        }
+    @GetMapping("/bac")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null);
     }
 
+    @GetMapping("/bac/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String result;
         try {
@@ -52,6 +46,7 @@ public class BrokenAccessHandler implements IRouteHandler {
         renderPage(res, result, null);
     }
 
+    @GetMapping("/bac/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         HttpSession session = req.getSession(false);
         String role = session != null ? (String) session.getAttribute("role") : null;

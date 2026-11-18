@@ -16,25 +16,19 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 
-public class SsrfHandler implements IRouteHandler {
+@Controller
+public class SsrfHandler {
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(5))
         .build();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/ssrf/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/ssrf/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null);
-        }
+    @GetMapping("/ssrf")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null);
     }
 
+    @PostMapping("/ssrf/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String url = req.getParameter("url");
         String result;
@@ -112,6 +106,7 @@ public class SsrfHandler implements IRouteHandler {
         }
     }
 
+    @PostMapping("/ssrf/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String url = req.getParameter("url2");
         List<String> allowlist = AppConfig.get().getSsrfAllowlist();

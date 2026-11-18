@@ -8,26 +8,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-public class XssHandler implements IRouteHandler {
+@Controller
+public class XssHandler {
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/xss/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/xss/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null, null, null);
-        }
+    @GetMapping("/xss")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null, null, null);
     }
 
+    @PostMapping("/xss/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String input = req.getParameter("comment");
         renderPage(res, input, input, null, null);
     }
 
+    @PostMapping("/xss/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String input = req.getParameter("comment2");
         renderPage(res, null, null, input, TemplateEngine.escape(input));

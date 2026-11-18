@@ -15,23 +15,17 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AuthFailuresHandler implements IRouteHandler {
+@Controller
+public class AuthFailuresHandler {
 
     private final UserRepository userRepository = new UserRepository();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/auth-failures/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/auth-failures/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null);
-        }
+    @GetMapping("/auth-failures")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null);
     }
 
+    @PostMapping("/auth-failures/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
@@ -53,6 +47,7 @@ public class AuthFailuresHandler implements IRouteHandler {
         renderPage(res, result, null);
     }
 
+    @PostMapping("/auth-failures/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         HttpSession session = req.getSession(true);
         AtomicInteger fails = (AtomicInteger) session.getAttribute("auth_fails");

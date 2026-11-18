@@ -10,21 +10,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class DbBrowserHandler implements IRouteHandler {
+@Controller
+public class DbBrowserHandler {
 
     private static final int DEFAULT_PAGE_SIZE = AppConfig.get().getInt("db_browser.default_page_size");
     private final DbBrowserRepository repo = new DbBrowserRepository();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-        if ("/db-browser/table".equals(path)) {
-            renderTable(req, res);
-        } else {
-            renderIndex(req, res);
-        }
-    }
-
+    @GetMapping("/db-browser")
     private void renderIndex(HttpServletRequest req, HttpServletResponse res) throws IOException {
         List<String> tables;
         try {
@@ -57,6 +49,7 @@ public class DbBrowserHandler implements IRouteHandler {
         res.getWriter().write(TemplateEngine.page("DB Browser", content, true));
     }
 
+    @GetMapping("/db-browser/table")
     private void renderTable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String table    = req.getParameter("table");
         String filter   = req.getParameter("filter");

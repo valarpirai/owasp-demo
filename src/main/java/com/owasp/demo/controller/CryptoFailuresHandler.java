@@ -13,21 +13,15 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HexFormat;
 
-public class CryptoFailuresHandler implements IRouteHandler {
+@Controller
+public class CryptoFailuresHandler {
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/crypto/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/crypto/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null, null, null);
-        }
+    @GetMapping("/crypto")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null, null, null);
     }
 
+    @PostMapping("/crypto/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String password = req.getParameter("password");
         String result;
@@ -44,6 +38,7 @@ public class CryptoFailuresHandler implements IRouteHandler {
         renderPage(res, password, result, null, null);
     }
 
+    @PostMapping("/crypto/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String password = req.getParameter("password2");
         String result;

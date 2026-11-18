@@ -41,7 +41,7 @@ class LoginHandlerTest {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn("/login");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("Sign In"));
@@ -53,7 +53,7 @@ class LoginHandlerTest {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn("/login");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("data-user=\"admin\""));
@@ -72,7 +72,7 @@ class LoginHandlerTest {
         when(req.getSession(true)).thenReturn(session);
         when(session.getId()).thenReturn("redirect-test-session");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(res).sendRedirect("/");
         verify(session).setAttribute("user", "admin");
@@ -86,7 +86,7 @@ class LoginHandlerTest {
         when(req.getParameter("username")).thenReturn("admin");
         when(req.getParameter("password")).thenReturn("wrongpass");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("Invalid username or password"));
@@ -100,7 +100,7 @@ class LoginHandlerTest {
         when(req.getPathInfo()).thenReturn("/logout");
         when(req.getSession(false)).thenReturn(session);
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(session).invalidate();
         verify(res).sendRedirect("/login");
@@ -112,7 +112,7 @@ class LoginHandlerTest {
         when(req.getPathInfo()).thenReturn("/logout");
         when(req.getSession(false)).thenReturn(null);
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(res).sendRedirect("/login");
     }
@@ -127,7 +127,7 @@ class LoginHandlerTest {
         when(req.getSession(false)).thenReturn(session);
         when(session.getId()).thenReturn("login-test-session");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(req).changeSessionId();
         verify(session).setAttribute("user", "admin");
@@ -142,7 +142,7 @@ class LoginHandlerTest {
         when(req.getPathInfo()).thenReturn("/login");
         when(req.getSession(false)).thenReturn(session);
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         verify(res).sendRedirect("/");
     }

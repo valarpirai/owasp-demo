@@ -14,24 +14,18 @@ import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
-public class LoggingMonitoringHandler implements IRouteHandler {
+@Controller
+public class LoggingMonitoringHandler {
 
     private final UserRepository userRepository = new UserRepository();
     private final AuditLogRepository auditLogRepository = new AuditLogRepository();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/logging/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/logging/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null);
-        }
+    @GetMapping("/logging")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null);
     }
 
+    @PostMapping("/logging/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
@@ -49,6 +43,7 @@ public class LoggingMonitoringHandler implements IRouteHandler {
         renderPage(res, result, null);
     }
 
+    @PostMapping("/logging/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String username = req.getParameter("username2");
         String password = req.getParameter("password2");

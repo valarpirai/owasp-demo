@@ -19,7 +19,8 @@ import java.util.Base64;
  * The vulnerable endpoint trusts the session cookie alone. The mitigated
  * endpoint also requires a per-session token that a forged request cannot know.
  */
-public class CsrfHandler implements IRouteHandler {
+@Controller
+public class CsrfHandler {
 
     private static final String DEFAULT_EMAIL = AppConfig.get().getString("csrf.default_email");
     private static final String ATTACKER_EMAIL = AppConfig.get().getString("csrf.attacker_email");
@@ -29,22 +30,12 @@ public class CsrfHandler implements IRouteHandler {
 
     private final SecureRandom random = new SecureRandom();
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-        boolean post = "POST".equals(req.getMethod());
-
-        if (post && "/csrf/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if (post && "/csrf/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else if ("/csrf/attack".equals(path)) {
-            renderAttackPage(req, res);
-        } else {
-            renderPage(req, res, null, null);
-        }
+    @GetMapping("/csrf")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(req, res, null, null);
     }
 
+    @PostMapping("/csrf/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String email = req.getParameter("email");
         req.getSession().setAttribute(EMAIL_VULN, email);
@@ -52,6 +43,7 @@ public class CsrfHandler implements IRouteHandler {
             + TemplateEngine.escape(email) + "</strong>. No token was checked.", false), null);
     }
 
+    @PostMapping("/csrf/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         HttpSession session = req.getSession();
         if (!tokenMatches((String) session.getAttribute(TOKEN), req.getParameter("csrfToken"))) {
@@ -143,6 +135,7 @@ public class CsrfHandler implements IRouteHandler {
      * Renders the attacker's page. It posts a forged email change without a token.
      * Only the two known targets are accepted, so the form action is never user-controlled.
      */
+    @GetMapping("/csrf/attack")
     private void renderAttackPage(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String target = "mitigated".equals(req.getParameter("target")) ? "mitigated" : "vulnerable";
         res.getWriter().write("""

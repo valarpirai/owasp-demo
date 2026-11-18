@@ -19,7 +19,7 @@ Follow Hemingway style while writing docs.
 
 ## Architecture
 
-Plain Java 21, no Spring. Single servlet (`AppServlet`) mapped to `/*` dispatches by `"METHOD /path"` key to `IRouteHandler` impls.
+Plain Java 21, no Spring. Single servlet (`AppServlet`) mapped to `/*` dispatches by `"METHOD /path"` key. `RouteRegistry` builds the table at startup. It scans `com.owasp.demo.controller` with ClassGraph for `@Controller` classes. It registers each `@GetMapping` and `@PostMapping` method. Routes are static paths. There are no path variables.
 
 **Use `req.getPathInfo()`**, not `getServletPath()`. With `/*` mapping, `getServletPath()` always returns `""` and causes redirect loops.
 
@@ -27,8 +27,8 @@ Plain Java 21, no Spring. Single servlet (`AppServlet`) mapped to `/*` dispatche
 
 ### Adding a demo
 
-1. Create `controller/MyHandler.java` implementing `IRouteHandler`.
-2. Register routes in `AppServlet`'s constructor.
+1. Create `controller/MyHandler.java`. Annotate the class with `@Controller`.
+2. Annotate each route method with `@GetMapping("/foo")` or `@PostMapping("/foo/vulnerable")`. It takes `(HttpServletRequest, HttpServletResponse)`. The scan registers it. No manual wiring.
 3. Add a card to the `cards:` list in `messages.yml`. Keep the list in OWASP ID order.
 4. Add the demo's title, badge (id, name, tag), info text and panel labels to `messages.yml`. Read them with `Messages.get("foo.title")`.
 5. Put each form in `templates/forms/foo-vulnerable.html` and `foo-mitigated.html`. Render it with `TemplateEngine.render("forms/…", Map.of(...))`.

@@ -13,26 +13,20 @@ import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class RceHandler implements IRouteHandler {
+@Controller
+public class RceHandler {
 
     private static final Pattern SAFE_HOST  = Pattern.compile(AppConfig.get().getString("rce.safe_host_pattern"));
     private static final Pattern SEPARATORS = Pattern.compile(AppConfig.get().getString("rce.separator_pattern"));
     private static final Pattern ALLOWED_COMMAND = Pattern.compile(AppConfig.get().getString("rce.allowed_command_pattern"));
     private static final java.util.Set<String> DEMO_HOSTS = java.util.Set.copyOf(AppConfig.get().getStringList("rce.demo_hosts"));
 
-    @Override
-    public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String path = req.getPathInfo();
-
-        if ("POST".equals(req.getMethod()) && "/rce/vulnerable".equals(path)) {
-            handleVulnerable(req, res);
-        } else if ("POST".equals(req.getMethod()) && "/rce/mitigated".equals(path)) {
-            handleMitigated(req, res);
-        } else {
-            renderPage(res, null, null, null, null);
-        }
+    @GetMapping("/rce")
+    public void page(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        renderPage(res, null, null, null, null);
     }
 
+    @PostMapping("/rce/vulnerable")
     private void handleVulnerable(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String host = req.getParameter("host");
         if (host == null) host = "";
@@ -96,6 +90,7 @@ public class RceHandler implements IRouteHandler {
         return true;
     }
 
+    @PostMapping("/rce/mitigated")
     private void handleMitigated(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String host = req.getParameter("host2");
         String result;

@@ -22,7 +22,7 @@ class Java4ShellHandlerTest {
         when(req.getPathInfo()).thenReturn(path);
         if (param != null) when(req.getParameter(param)).thenReturn(value);
         when(res.getWriter()).thenReturn(new PrintWriter(sw));
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
         return sw.toString();
     }
 

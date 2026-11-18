@@ -49,7 +49,7 @@ class LoggingMonitoringHandlerTest {
         when(req.getParameter("username")).thenReturn("admin");
         when(req.getParameter("password")).thenReturn("wrongpass");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         List<AuditLog> after = auditRepo.findRecent(100);
         assertEquals(before.size(), after.size(), "Vulnerable endpoint must not log failed logins");
@@ -62,7 +62,7 @@ class LoggingMonitoringHandlerTest {
         when(req.getParameter("username2")).thenReturn("admin");
         when(req.getParameter("password2")).thenReturn("wrongpass");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         List<AuditLog> logs = auditRepo.findRecent(5);
         assertTrue(logs.stream().anyMatch(l -> "LOGIN_FAILED".equals(l.event())));
@@ -75,7 +75,7 @@ class LoggingMonitoringHandlerTest {
         when(req.getParameter("username2")).thenReturn("admin");
         when(req.getParameter("password2")).thenReturn("admin123");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         List<AuditLog> logs = auditRepo.findRecent(5);
         assertTrue(logs.stream().anyMatch(l -> "LOGIN_SUCCESS".equals(l.event())));

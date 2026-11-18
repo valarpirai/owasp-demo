@@ -22,7 +22,7 @@ class RceHandlerTest {
         when(req.getPathInfo()).thenReturn(path);
         when(req.getParameter(paramName)).thenReturn(paramValue);
         when(res.getWriter()).thenReturn(new PrintWriter(sw));
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
         return sw.toString();
     }
 

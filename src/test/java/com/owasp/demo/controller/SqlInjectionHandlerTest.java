@@ -40,7 +40,7 @@ class SqlInjectionHandlerTest {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn("/sqli");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("Vulnerable"));
@@ -55,7 +55,7 @@ class SqlInjectionHandlerTest {
         when(req.getPathInfo()).thenReturn("/sqli/vulnerable");
         when(req.getParameter("username")).thenReturn("admin");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("admin"));
@@ -67,7 +67,7 @@ class SqlInjectionHandlerTest {
         when(req.getPathInfo()).thenReturn("/sqli/vulnerable");
         when(req.getParameter("username")).thenReturn("' OR '1'='1");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         // Both users should be in the result — injection dumped the table
         String body = responseBody.toString();
@@ -81,7 +81,7 @@ class SqlInjectionHandlerTest {
         when(req.getPathInfo()).thenReturn("/sqli/mitigated");
         when(req.getParameter("username2")).thenReturn("' OR '1'='1");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         // Injection string is not a real username — no results
         String body = responseBody.toString();
@@ -94,7 +94,7 @@ class SqlInjectionHandlerTest {
         when(req.getPathInfo()).thenReturn("/sqli/mitigated");
         when(req.getParameter("username2")).thenReturn("admin");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("admin"));

@@ -32,7 +32,7 @@ class XssHandlerTest {
         when(req.getPathInfo()).thenReturn("/xss/vulnerable");
         when(req.getParameter("comment")).thenReturn("<script>alert('XSS')</script>");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         // The raw script tag is present in the response (the vulnerability)
         assertTrue(responseBody.toString().contains("<script>alert('XSS')</script>"));
@@ -44,7 +44,7 @@ class XssHandlerTest {
         when(req.getPathInfo()).thenReturn("/xss/mitigated");
         when(req.getParameter("comment2")).thenReturn("<script>alert('XSS')</script>");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         // The raw script tag must NOT appear — it must be escaped
@@ -58,7 +58,7 @@ class XssHandlerTest {
         when(req.getPathInfo()).thenReturn("/xss/mitigated");
         when(req.getParameter("comment2")).thenReturn("<img src=x onerror=alert(1)>");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertFalse(body.contains("<img src=x onerror=alert(1)>"));
@@ -70,7 +70,7 @@ class XssHandlerTest {
         when(req.getMethod()).thenReturn("GET");
         when(req.getPathInfo()).thenReturn("/xss");
 
-        handler.handle(req, res);
+        TestRoutes.call(handler, req, res);
 
         String body = responseBody.toString();
         assertTrue(body.contains("/xss/vulnerable"));

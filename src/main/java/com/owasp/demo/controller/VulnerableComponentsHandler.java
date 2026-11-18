@@ -7,7 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-public class VulnerableComponentsHandler implements IRouteHandler {
+@Controller
+public class VulnerableComponentsHandler {
 
     private record Dep(String name, String vulnVersion, String cve, String description, String fixVersion) {}
 
@@ -19,7 +20,7 @@ public class VulnerableComponentsHandler implements IRouteHandler {
         new Dep("Tomcat",         "10.0.20","CVE-2022-34305",             "XSS in the manager application via crafted session IDs.",          "10.0.21+"),
     };
 
-    @Override
+    @GetMapping("/vuln-components")
     public void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
         StringBuilder rows = new StringBuilder();
         for (Dep d : DEPS) {
