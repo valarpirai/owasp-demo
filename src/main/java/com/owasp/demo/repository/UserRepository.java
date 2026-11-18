@@ -2,6 +2,7 @@ package com.owasp.demo.repository;
 
 import com.owasp.demo.db.JooqProvider;
 import com.owasp.demo.model.User;
+import com.owasp.demo.util.PasswordHasher;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -15,14 +16,13 @@ import static org.jooq.impl.DSL.table;
 public class UserRepository {
 
     public Optional<User> findByUsernameAndPasswordSafe(String username, String password) throws SQLException {
-        DSLContext ctx = JooqProvider.ctx();
-        Result<Record> result = ctx.select()
-            .from(table("users"))
-            .where(field("username").eq(username)
-                .and(field("password").eq(password)))
-            .fetch();
-
-        return result.isEmpty() ? Optional.empty() : Optional.of(map(result.getFirst()));
+        List<User> found = findByUsernameSafe(username);
+        if (found.isEmpty()) {
+            PasswordHasher.verifyAgainstDummy(password);
+            return Optional.empty();
+        }
+        User user = found.getFirst();
+        return PasswordHasher.verify(password, user.password()) ? Optional.of(user) : Optional.empty();
     }
 
     public List<User> findAllUnsafe(String usernameInput) throws SQLException {

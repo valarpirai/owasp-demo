@@ -1,9 +1,12 @@
 package com.owasp.demo.db;
 
 import com.owasp.demo.config.AppConfig;
+import com.owasp.demo.util.PasswordHasher;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -12,6 +15,31 @@ public class Database {
     public static Connection getConnection() throws SQLException {
         AppConfig cfg = AppConfig.get();
         return DriverManager.getConnection(cfg.getDbUrl(), cfg.getDbUsername(), cfg.getDbPassword());
+    }
+
+    /**
+     * Adds a user with a bcrypt hash of the password. An existing user is left as it is,
+     * so repeated init calls do not re-hash.
+     *
+     * @param conn open connection
+     * @param username login name
+     * @param password clear-text seed password from application.yml
+     * @param role user role
+     */
+    private static void seedUser(Connection conn, String username, String password, String role) throws SQLException {
+        try (PreparedStatement exists = conn.prepareStatement("SELECT 1 FROM users WHERE username = ?")) {
+            exists.setString(1, username);
+            try (ResultSet rs = exists.executeQuery()) {
+                if (rs.next()) return;
+            }
+        }
+        try (PreparedStatement insert = conn.prepareStatement(
+                "INSERT INTO users (username, password, role) VALUES (?, ?, ?)")) {
+            insert.setString(1, username);
+            insert.setString(2, PasswordHasher.hash(password));
+            insert.setString(3, role);
+            insert.executeUpdate();
+        }
     }
 
     public static void init() throws SQLException {
@@ -55,15 +83,8 @@ public class Database {
             """);
 
             AppConfig cfg = AppConfig.get();
-            stmt.execute("""
-                MERGE INTO users (username, password, role)
-                KEY(username)
-                VALUES ('%s', '%s', '%s'),
-                       ('%s', '%s', '%s')
-            """.formatted(
-                cfg.getAdminUsername(), cfg.getAdminPassword(), cfg.getAdminRole(),
-                cfg.getSeedUsername(), cfg.getSeedPassword(), cfg.getSeedRole()
-            ));
+            seedUser(conn, cfg.getAdminUsername(), cfg.getAdminPassword(), cfg.getAdminRole());
+            seedUser(conn, cfg.getSeedUsername(), cfg.getSeedPassword(), cfg.getSeedRole());
 
             stmt.execute("""
                 MERGE INTO products (id, name, price, description)

@@ -77,4 +77,27 @@ class UserRepositoryTest {
         assertEquals(1, users.size());
         assertEquals("admin", users.getFirst().username());
     }
+
+    @Test
+    void storedPasswordsAreBcryptHashes() throws SQLException {
+        for (User u : repo.findAll()) {
+            assertTrue(u.password().startsWith("$2a$"), u.username() + " must be stored as bcrypt");
+            assertNotEquals("admin123", u.password());
+            assertNotEquals("user123", u.password());
+        }
+    }
+
+    @Test
+    void wrongPasswordAndUnknownUserAreRejected() throws SQLException {
+        assertTrue(repo.findByUsernameAndPasswordSafe("admin", "wrong").isEmpty());
+        assertTrue(repo.findByUsernameAndPasswordSafe("nobody", "admin123").isEmpty());
+        assertTrue(repo.findByUsernameAndPasswordSafe("admin", null).isEmpty());
+    }
+
+    @Test
+    void repeatedInitKeepsTheSameHash() throws SQLException {
+        String before = repo.findByUsernameSafe("admin").getFirst().password();
+        com.owasp.demo.db.Database.init();
+        assertEquals(before, repo.findByUsernameSafe("admin").getFirst().password());
+    }
 }

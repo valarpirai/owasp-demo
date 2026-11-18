@@ -107,7 +107,7 @@ public class BrokenAccessHandler implements IRouteHandler {
 
         String exploits = TemplateEngine.exploitBox(new String[][]{
             {"Direct object access", "GET /bac/vulnerable",
-             "Visit this URL as any logged-in user (even role=USER) to dump all user records including passwords.",
+             "Visit this URL as any logged-in user (even role=USER) to dump all user records including password hashes.",
              null,
              "curl -s http://localhost:8090/bac/vulnerable -b 'SESSION_COOKIE=SESSION'"},
             {"IDOR — change user ID", "GET /bac/vulnerable?id=1",

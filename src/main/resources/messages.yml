@@ -12,7 +12,7 @@ sqli:
     mitigated: "Mitigated — Prepared Statement"
 bac:
   info:
-    explanation: "The admin endpoint returns all user data (including passwords) to any authenticated user, regardless of their role. Any logged-in user can access <code>/bac/vulnerable</code> and read sensitive records they should not see."
+    explanation: "The admin endpoint returns all user data (including password hashes) to any authenticated user, regardless of their role. Any logged-in user can access <code>/bac/vulnerable</code> and read sensitive records they should not see."
     mitigation: "Enforce role-based access control on every sensitive endpoint. Check the user's role from the session on the server side — never trust the client to restrict access. Return HTTP 403 when the role check fails."
   badge:
     id: "A01"

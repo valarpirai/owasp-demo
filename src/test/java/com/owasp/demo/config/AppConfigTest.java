@@ -52,6 +52,7 @@ class AppConfigTest {
         assertEquals(5, cfg.getInt("session.timeout_minutes"));
         assertEquals("Lax", cfg.getString("session.same_site"));
         assertEquals("OWASP_SID", cfg.getString("session.cookie_name"));
+        assertEquals("true", cfg.getString("server.virtual_threads"));
         assertTrue(cfg.getStringList("security.public_paths").contains("/login"));
         assertEquals("DENY", cfg.getStringMap("security.headers").get("X-Frame-Options"));
     }

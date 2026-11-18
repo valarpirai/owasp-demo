@@ -44,8 +44,9 @@ class BrokenAccessHandlerTest {
         handler.handle(req, res);
 
         String body = responseBody.toString();
-        // Passwords are visible in the vulnerable response
-        assertTrue(body.contains("admin123") || body.contains("user123"));
+        // Password hashes are visible in the vulnerable response. Clear text is not stored.
+        assertTrue(body.contains("$2a$"));
+        assertFalse(body.contains(">admin123<") || body.contains(">user123<"));
     }
 
     @Test

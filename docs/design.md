@@ -12,7 +12,7 @@ A Java 21 web app. It runs on embedded Tomcat. It shows each OWASP Top 10 vulner
 |------------|-------------------------------|
 | Language   | Java 21                       |
 | Build      | Gradle 8                      |
-| Server     | Apache Tomcat 10.1 (embedded) |
+| Server     | Apache Tomcat 10.1 (embedded), virtual threads |
 | Database   | H2 in-memory                  |
 | UI         | Tailwind CSS via CDN          |
 | Templates  | HTML files + Java strings     |
@@ -131,7 +131,11 @@ The request filter still trusts the Tomcat session, not the `sessions` table.
 
 ## Database
 
+The H2 web console runs at `/h2-console`. `Main` mounts H2's `JakartaWebServlet` there when `h2_console.enabled` is true. `ConsoleAuthFilter` sits in front and applies the same login rules as the rest of the app, so the console is not open to anonymous requests. It connects to the in-memory database in the same JVM. H2 also refuses non-local connections by default.
+
 Four tables: `users`, `products`, `audit_log`, `sessions`. `Database.init()` creates them and seeds two users on startup. Seed values come from `application.yml`, not hardcoded.
+
+Passwords are stored as bcrypt hashes. `PasswordHasher` wraps jBCrypt. The cost is `auth.bcrypt_cost` (default 10). Each hash has its own salt. Seeding hashes the config password once and skips users that already exist. Login, Basic auth and the demo logins call `UserRepository.findByUsernameAndPasswordSafe()`, which loads the user by name and checks the hash. An unknown name still burns one hash check, so timing does not reveal which names exist. The login page buttons read the demo passwords from config, because the database holds no clear text.
 
 ---
 
@@ -184,6 +188,12 @@ The app is a local-only playground. Three layers keep it from causing real harm:
 | `DEMO_MITIGATED`  | The mitigated path is used  |
 
 Details read `user=… method=… path=… status=… params=…`. It lists parameter names only. Values are left out because demos receive passwords and secrets. A failed write never breaks the request.
+
+---
+
+## Access Log
+
+`Main` adds Tomcat's `AccessLogValve` to the host. It writes `logs/access_log.<date>.log` with no buffering, and rotates daily. The default pattern is `%h %l %{user}s %t "%r" %s %b %{ms}Tms`. `%{user}s` reads the `user` attribute from the session, so Basic auth and form logins both show the app user. The pattern has no `%{Authorization}i`, no cookies and no bodies, so secrets never reach the file. Settings live under `access_log` in `application.yml`.
 
 ---
 

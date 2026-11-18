@@ -58,6 +58,8 @@ class LoginHandlerTest {
         String body = responseBody.toString();
         assertTrue(body.contains("data-user=\"admin\""));
         assertTrue(body.contains("data-user=\"user\""));
+        assertTrue(body.contains("data-pass=\"admin123\""), "demo buttons use the seed password from config");
+        assertFalse(body.contains("data-pass=\"$2a$"), "hashes are never put in the form");
     }
 
     @Test

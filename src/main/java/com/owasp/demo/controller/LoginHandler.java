@@ -96,12 +96,25 @@ public class LoginHandler implements IRouteHandler {
                     </li>
                     """.formatted(
                         TemplateEngine.escape(u.username()), TemplateEngine.escape(u.role()),
-                        TemplateEngine.escape(u.username()), TemplateEngine.escape(u.password())));
+                        TemplateEngine.escape(u.username()), TemplateEngine.escape(demoPassword(u.username()))));
             }
             return rows.toString();
         } catch (Exception e) {
             return "";
         }
+    }
+
+    /**
+     * The database holds only hashes, so the demo buttons read the seed passwords from config.
+     *
+     * @param username a listed user
+     * @return the seed password, or an empty string for any other user
+     */
+    private String demoPassword(String username) {
+        AppConfig cfg = AppConfig.get();
+        if (username.equals(cfg.getAdminUsername())) return cfg.getAdminPassword();
+        if (username.equals(cfg.getSeedUsername())) return cfg.getSeedPassword();
+        return "";
     }
 
     private void renderLogin(HttpServletResponse res, String error) throws IOException {

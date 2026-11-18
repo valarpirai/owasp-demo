@@ -1,6 +1,14 @@
 server:
   port: 8090
   bind_address: 127.0.0.1
+  virtual_threads: true
+
+access_log:
+  enabled: true
+  directory: logs
+  prefix: access_log
+  suffix: .log
+  pattern: '%h %l %{user}s %t "%r" %s %b %{ms}Tms'
 
 session:
   timeout_minutes: 5
@@ -37,6 +45,10 @@ java4shell:
     - "-XX:-UseBASE64Intrinsics"
     - "-XX:UseAVX=2"
 
+h2_console:
+  enabled: true
+  path: /h2-console
+
 db_browser:
   default_page_size: 10
 
@@ -65,6 +77,7 @@ ssrf:
 auth:
   max_failed_attempts: 3
   lockout_minutes: 5
+  bcrypt_cost: 10
 
 otp:
   max_attempts: 5
