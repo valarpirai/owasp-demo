@@ -27,7 +27,7 @@ Follow these rules for every new demo. `CsrfHandler` is the reference.
 
 ## Audit
 
-- `AppServlet` logs every demo request to `audit_log`. Do not add your own log call.
+- `RouteInterceptor` logs every demo request to `audit_log`. Do not add your own log call.
 - Never put secrets in a handler's parameter names. Values are not logged.
 
 ## Safety

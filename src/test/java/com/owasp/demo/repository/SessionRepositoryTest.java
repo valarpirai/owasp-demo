@@ -36,4 +36,25 @@ class SessionRepositoryTest {
         assertEquals(0L, ((Number) stored).longValue());
         repo.delete("raw-id-xyz");
     }
+
+    @Test
+    void touch_pushesExpiryForward() throws SQLException {
+        repo.create("touch-id", adminId, 1);
+        Object before = com.owasp.demo.db.JooqProvider.ctx()
+            .fetchValue("SELECT expires_at FROM sessions WHERE session_id = '" + sha("touch-id") + "'");
+        repo.touch("touch-id", 5);
+        Object after = com.owasp.demo.db.JooqProvider.ctx()
+            .fetchValue("SELECT expires_at FROM sessions WHERE session_id = '" + sha("touch-id") + "'");
+        assertTrue(((java.sql.Timestamp) after).after((java.sql.Timestamp) before));
+        repo.delete("touch-id");
+    }
+
+    private static String sha(String v) throws SQLException {
+        try {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                .digest(v.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }

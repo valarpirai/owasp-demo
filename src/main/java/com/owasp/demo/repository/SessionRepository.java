@@ -41,6 +41,21 @@ public class SessionRepository {
     }
 
     /**
+     * Marks the session as active now and pushes its expiry forward.
+     *
+     * @param sessionId the servlet session ID
+     * @param ttlMinutes minutes of inactivity before the row expires
+     */
+    public void touch(String sessionId, int ttlMinutes) throws SQLException {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        JooqProvider.ctx().update(table("sessions"))
+            .set(field("last_seen_at"), now)
+            .set(field("expires_at"), now.plusMinutes(ttlMinutes))
+            .where(field("session_id").eq(hash(sessionId)))
+            .execute();
+    }
+
+    /**
      * Removes a session row, for example on logout.
      *
      * @param sessionId the servlet session ID

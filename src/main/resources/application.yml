@@ -3,7 +3,7 @@ server:
   bind_address: 127.0.0.1
 
 session:
-  timeout_minutes: 30
+  timeout_minutes: 5
   same_site: Lax
 
 security:

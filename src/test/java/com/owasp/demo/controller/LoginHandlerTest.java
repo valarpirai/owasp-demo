@@ -131,4 +131,17 @@ class LoginHandlerTest {
         verify(session).setAttribute("user", "admin");
         assertTrue(new com.owasp.demo.repository.SessionRepository().exists("login-test-session"));
     }
+
+    @Test
+    void getLogin_redirectsWhenAlreadyLoggedIn() throws Exception {
+        HttpSession session = mock(HttpSession.class);
+        when(session.getAttribute("user")).thenReturn("admin");
+        when(req.getMethod()).thenReturn("GET");
+        when(req.getPathInfo()).thenReturn("/login");
+        when(req.getSession(false)).thenReturn(session);
+
+        handler.handle(req, res);
+
+        verify(res).sendRedirect("/");
+    }
 }

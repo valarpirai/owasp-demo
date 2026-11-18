@@ -57,7 +57,7 @@ Exploit payloads and form markup stay in the handlers.
 
 ## Sessions and audit
 
-Login rotates the session ID. The cookie is `HttpOnly` and `SameSite=Lax`. Sessions expire after 30 minutes idle. Each login writes a row to the `sessions` table. It stores a SHA-256 hash of the ID, not the ID.
+Login rotates the session ID. The cookie is `HttpOnly` and `SameSite=Lax`. Sessions expire after 5 minutes idle. Every request resets the clock. All tabs in one browser share the session cookie, so they share the session. Logout and timeout delete the `sessions` row. Each login writes a row to the `sessions` table. It stores a SHA-256 hash of the ID, not the ID.
 
 Every demo request writes a row to `audit_log`. Open `/db-browser` to read it.
 

@@ -49,7 +49,7 @@ class AppConfigTest {
 
     @Test
     void genericLookupReadsNestedValues() {
-        assertEquals(30, cfg.getInt("session.timeout_minutes"));
+        assertEquals(5, cfg.getInt("session.timeout_minutes"));
         assertEquals("Lax", cfg.getString("session.same_site"));
         assertTrue(cfg.getStringList("security.public_paths").contains("/login"));
         assertEquals("DENY", cfg.getStringMap("security.headers").get("X-Frame-Options"));

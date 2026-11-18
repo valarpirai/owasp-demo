@@ -41,6 +41,12 @@ public class LoginHandler implements IRouteHandler {
             return;
         }
 
+        HttpSession existing = req.getSession(false);
+        if (existing != null && existing.getAttribute("user") != null) {
+            // Another tab already logged in. Same cookie, same session.
+            res.sendRedirect("/");
+            return;
+        }
         renderLogin(res, null);
     }
 

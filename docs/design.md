@@ -27,7 +27,8 @@ A Java 21 web app. It runs on embedded Tomcat. It shows each OWASP Top 10 vulner
 ```
 com.owasp.demo/
 ├── Main.java              — starts Tomcat
-├── AppServlet.java        — one servlet, routes all requests
+├── AppServlet.java        — one servlet, runs interceptors, then the route handler
+├── interceptor/           — AuthInterceptor (login + session touch), RouteInterceptor (headers + audit)
 ├── config/                — loads application.yml at startup
 ├── util/                  — ConfigUtil (dotted YAML lookup), Messages (loads messages.yml)
 ├── controller/            — one handler per vulnerability
@@ -112,7 +113,9 @@ The login page lists every user from the `users` table. A button fills the form.
 On login the app:
 
 - Rotates the session ID with `changeSessionId()`. This stops session fixation.
-- Writes a row to `sessions`. The row holds a SHA-256 hash of the ID, the user, and UTC timestamps. Logout deletes it.
+- Writes a row to `sessions`. The row holds a SHA-256 hash of the ID, the user, and UTC timestamps. Each request moves `last_seen_at` and `expires_at` forward. `SessionCleanupListener` deletes the row when the session ends, by logout or by timeout.
+
+Tabs in one browser share the session cookie, so they share one session. Opening `/login` while logged in redirects to the dashboard.
 
 Tomcat sets the cookie `HttpOnly` and `SameSite=Lax`. Sessions end after `session.timeout_minutes` idle. The `Secure` flag is off because the app runs on plain HTTP.
 
@@ -157,13 +160,13 @@ The app is a local-only playground. Three layers keep it from causing real harm:
 | RCE host allowlist | `RceHandler` | Only `localhost`, `example.com`, `127.0.0.1` run a real `ping`. Other valid hostnames show the constructed command without executing it. |
 | Shell injection guard | `RceHandler` | Any input that fails the `[a-zA-Z0-9._-]` regex shows `INJECTION DETECTED` and the constructed command, not executed. |
 | HMAC secret in config | `application.yml` | Secret lives outside source. Change it before any shared deployment. |
-| Security headers | `AppServlet` | Headers from `security.headers` in `application.yml`. Default: `nosniff` and `X-Frame-Options: DENY`. |
+| Security headers | `RouteInterceptor` | Headers from `security.headers` in `application.yml`. Default: `nosniff` and `X-Frame-Options: DENY`. |
 
 ---
 
 ## Audit Log
 
-`AppServlet` writes one `audit_log` row for every demo request. Login, logout and the dashboard are not logged.
+`RouteInterceptor` writes one `audit_log` row for every demo request. Login, logout and the dashboard are not logged.
 
 | Event             | When                        |
 |-------------------|-----------------------------|
