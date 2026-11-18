@@ -94,7 +94,7 @@ class TemplateEngineTest {
 
     @Test
     void vulnerabilityBadgeContainsIdAndName() {
-        String badge = TemplateEngine.vulnerabilityBadge("A03", "SQL Injection");
+        String badge = TemplateEngine.vulnerabilityBadge("A03", "SQL Injection", "SQLi");
         assertTrue(badge.contains("A03"));
         assertTrue(badge.contains("SQL Injection"));
     }

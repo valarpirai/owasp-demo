@@ -49,6 +49,18 @@ class LoginHandlerTest {
     }
 
     @Test
+    void getLoginPage_listsUsersFromDatabase() throws Exception {
+        when(req.getMethod()).thenReturn("GET");
+        when(req.getPathInfo()).thenReturn("/login");
+
+        handler.handle(req, res);
+
+        String body = responseBody.toString();
+        assertTrue(body.contains("data-user=\"admin\""));
+        assertTrue(body.contains("data-user=\"user\""));
+    }
+
+    @Test
     void postLogin_redirectsOnValidCredentials() throws Exception {
         HttpSession session = mock(HttpSession.class);
         when(req.getMethod()).thenReturn("POST");
@@ -100,5 +112,20 @@ class LoginHandlerTest {
         handler.handle(req, res);
 
         verify(res).sendRedirect("/login");
+    }
+
+    @Test
+    void successfulLogin_rotatesExistingSessionId() throws Exception {
+        HttpSession session = mock(HttpSession.class);
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getPathInfo()).thenReturn("/login");
+        when(req.getParameter("username")).thenReturn("admin");
+        when(req.getParameter("password")).thenReturn("admin123");
+        when(req.getSession(false)).thenReturn(session);
+
+        handler.handle(req, res);
+
+        verify(req).changeSessionId();
+        verify(session).setAttribute("user", "admin");
     }
 }

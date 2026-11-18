@@ -131,7 +131,7 @@ public class BrokenAccessHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/bac/mitigated -b 'JSESSIONID=SESSION' -d 'role=ADMIN'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control", "Access Control") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Broken Access Control", content, true));
     }
 }

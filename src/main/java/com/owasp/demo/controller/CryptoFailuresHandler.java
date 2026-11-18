@@ -122,7 +122,7 @@ public class CryptoFailuresHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/crypto/vulnerable -b 'JSESSIONID=SESSION' -d 'password='"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A02", "Cryptographic Failures") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A02", "Cryptographic Failures", "Crypto") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Cryptographic Failures", content, true));
     }
 }

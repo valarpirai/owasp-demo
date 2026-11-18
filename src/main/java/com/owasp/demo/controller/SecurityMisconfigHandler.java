@@ -94,7 +94,7 @@ public class SecurityMisconfigHandler implements IRouteHandler {
              "curl -s http://localhost:8090/h2-console/login.do -X POST -d 'url=jdbc:h2:mem:owaspdb&user=sa&password='"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A05", "Security Misconfiguration") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A05", "Security Misconfiguration", "Misconfig") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Security Misconfiguration", content, true));
     }
 }

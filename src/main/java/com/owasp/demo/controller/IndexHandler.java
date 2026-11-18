@@ -9,21 +9,23 @@ import java.io.IOException;
 
 public class IndexHandler implements IRouteHandler {
 
-    private record VulnCard(String id, String name, String path, String description) {}
+    private record VulnCard(String id, String tag, String name, String path, String description) {}
 
+    /** Cards are listed in OWASP ID order. */
     private static final VulnCard[] CARDS = {
-        new VulnCard("A01", "Broken Access Control",       "/bac",             "Restrictions on authenticated users are not properly enforced."),
-        new VulnCard("A02", "Cryptographic Failures",      "/crypto",          "Sensitive data exposed due to weak or missing cryptography."),
-        new VulnCard("A03", "Injection",                   "/sqli",            "Hostile data is sent to an interpreter as part of a query or command."),
-        new VulnCard("A04", "Insecure Design",             "/insecure-design", "Missing or ineffective control design allows abuse of business logic."),
-        new VulnCard("A05", "Security Misconfiguration",   "/misconfig",       "Insecure default configs, verbose errors, or unnecessary features enabled."),
-        new VulnCard("A06", "Vulnerable Components",       "/vuln-components", "Components with known vulnerabilities used without patching."),
-        new VulnCard("A07", "Auth Failures",               "/auth-failures",   "Weaknesses in authentication allow account compromise."),
-        new VulnCard("A08", "Data Integrity Failures",     "/integrity",       "Code and data integrity failures, insecure deserialization."),
-        new VulnCard("A09", "Logging & Monitoring Failures","/logging",        "Insufficient logging prevents detection of active breaches."),
-        new VulnCard("A10", "SSRF",                        "/ssrf",            "Server fetches a remote resource from an attacker-controlled URL."),
-        new VulnCard("A03", "OS Command Injection (RCE)", "/rce",             "User input concatenated into a shell command executes arbitrary OS commands."),
-        new VulnCard("A01", "Cross-Site Request Forgery", "/csrf",            "A forged request rides on the victim's session cookie to change state.")
+        new VulnCard("A01", "Access Control", "Broken Access Control",        "/bac",             "Restrictions on authenticated users are not properly enforced."),
+        new VulnCard("A01", "CSRF",           "Cross-Site Request Forgery",   "/csrf",            "A forged request rides on the victim's session cookie to change state."),
+        new VulnCard("A02", "Crypto",         "Cryptographic Failures",       "/crypto",          "Sensitive data exposed due to weak or missing cryptography."),
+        new VulnCard("A03", "SQLi",           "Injection",                    "/sqli",            "Hostile data is sent to an interpreter as part of a query or command."),
+        new VulnCard("A03", "XSS",            "Cross-Site Scripting",         "/xss",             "Untrusted input is reflected into a page and runs as script in the victim's browser."),
+        new VulnCard("A03", "RCE",            "OS Command Injection",         "/rce",             "User input concatenated into a shell command executes arbitrary OS commands."),
+        new VulnCard("A04", "Design",         "Insecure Design",              "/insecure-design", "Missing or ineffective control design allows abuse of business logic."),
+        new VulnCard("A05", "Misconfig",      "Security Misconfiguration",    "/misconfig",       "Insecure default configs, verbose errors, or unnecessary features enabled."),
+        new VulnCard("A06", "Components",     "Vulnerable Components",        "/vuln-components", "Components with known vulnerabilities used without patching."),
+        new VulnCard("A07", "Auth",           "Auth Failures",                "/auth-failures",   "Weaknesses in authentication allow account compromise."),
+        new VulnCard("A08", "Integrity",      "Data Integrity Failures",      "/integrity",       "Code and data integrity failures, insecure deserialization."),
+        new VulnCard("A09", "Logging",        "Logging & Monitoring Failures","/logging",         "Insufficient logging prevents detection of active breaches."),
+        new VulnCard("A10", "SSRF",           "SSRF",                         "/ssrf",            "Server fetches a remote resource from an attacker-controlled URL.")
     };
 
     @Override
@@ -37,11 +39,12 @@ public class IndexHandler implements IRouteHandler {
                 <a href="%s" class="block bg-white rounded-lg shadow hover:shadow-md transition p-5 border-l-4 border-red-500">
                   <div class="flex items-center gap-2 mb-1">
                     <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">%s</span>
+                    <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-0.5 rounded">%s</span>
                   </div>
                   <h3 class="font-semibold text-gray-800 mb-1">%s</h3>
                   <p class="text-sm text-gray-500">%s</p>
                 </a>
-                """.formatted(c.path(), c.id(), c.name(), c.description()));
+                """.formatted(c.path(), c.id(), c.tag(), c.name(), c.description()));
         }
 
         String content = """

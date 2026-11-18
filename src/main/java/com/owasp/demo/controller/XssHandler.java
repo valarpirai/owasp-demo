@@ -106,7 +106,7 @@ public class XssHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/xss/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode \"comment=<script>fetch('/logout')</script>\""},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — Cross-Site Scripting (XSS)") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — Cross-Site Scripting (XSS)", "XSS") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("XSS", content, true));
     }
 }

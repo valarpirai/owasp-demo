@@ -125,7 +125,7 @@ public class LoggingMonitoringHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/logging/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode $'username=admin\\nLOGIN_SUCCESS user=attacker' -d 'password=x'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A09", "Security Logging & Monitoring Failures") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A09", "Security Logging & Monitoring Failures", "Logging") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Logging Failures", content, true));
     }
 

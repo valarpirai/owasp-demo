@@ -143,7 +143,7 @@ public class DataIntegrityHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/integrity/mitigated -b 'JSESSIONID=SESSION' -d 'payload=eyJ1c2VyIjoiZXZpbCIsInJvbGUiOiJBRE1JTiJ9&sig=invalidsignature'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A08", "Software & Data Integrity Failures") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A08", "Software & Data Integrity Failures", "Integrity") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Data Integrity Failures", content, true));
     }
 }

@@ -19,17 +19,9 @@
         Sign In
       </button>
     </form>
-    <div class="mt-4 flex gap-2">
-      <button type="button"
-        onclick="document.querySelector('[name=username]').value='admin';document.querySelector('[name=password]').value='admin123'"
-        class="flex-1 border border-gray-300 rounded py-1.5 text-xs text-gray-600 hover:bg-gray-50">
-        Login as admin
-      </button>
-      <button type="button"
-        onclick="document.querySelector('[name=username]').value='user';document.querySelector('[name=password]').value='user123'"
-        class="flex-1 border border-gray-300 rounded py-1.5 text-xs text-gray-600 hover:bg-gray-50">
-        Login as user
-      </button>
+    <div class="mt-6">
+      <h2 class="text-xs font-semibold text-gray-500 uppercase mb-2">Demo users</h2>
+      <ul class="space-y-1">{users}</ul>
     </div>
   </div>
 </div>

@@ -113,7 +113,7 @@ public class InsecureDesignHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/insecure-design/vulnerable -b 'JSESSIONID=SESSION' -d 'otp=111111'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A04", "Insecure Design") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A04", "Insecure Design", "Design") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Insecure Design", content, true));
     }
 }

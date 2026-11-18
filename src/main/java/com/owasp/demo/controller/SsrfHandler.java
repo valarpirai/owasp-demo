@@ -201,7 +201,7 @@ public class SsrfHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/ssrf/vulnerable -b 'JSESSIONID=SESSION' --data-urlencode 'url=file:///etc/passwd'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A10", "Server-Side Request Forgery (SSRF)") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A10", "Server-Side Request Forgery (SSRF)", "SSRF") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("SSRF", content, true));
     }
 }

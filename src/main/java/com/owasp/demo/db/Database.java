@@ -43,6 +43,17 @@ public class Database {
                 )
             """);
 
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS sessions (
+                    session_id VARCHAR(64) PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP NOT NULL,
+                    FOREIGN KEY (user_id) REFERENCES users(id)
+                )
+            """);
+
             AppConfig cfg = AppConfig.get();
             stmt.execute("""
                 MERGE INTO users (username, password, role)

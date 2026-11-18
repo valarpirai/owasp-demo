@@ -44,13 +44,22 @@ public class TemplateEngine {
             .replace("'", "&#x27;");
     }
 
-    public static String vulnerabilityBadge(String id, String name) {
+    /**
+     * Renders the page header with the category ID, a short demo tag, and the title.
+     *
+     * @param id OWASP category ID, such as A03
+     * @param name page title
+     * @param tag short demo label, such as SQLi
+     * @return header HTML
+     */
+    public static String vulnerabilityBadge(String id, String name, String tag) {
         return """
             <div class="mb-6">
               <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-1 rounded">%s</span>
+              <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded">%s</span>
               <h1 class="text-2xl font-bold text-gray-800 mt-2">%s</h1>
             </div>
-            """.formatted(id, name);
+            """.formatted(id, escape(tag), name);
     }
 
     public static String infoBox(String explanation, String mitigation) {

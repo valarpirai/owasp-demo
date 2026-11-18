@@ -152,7 +152,7 @@ public class CsrfHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/csrf/mitigated -b 'JSESSIONID=SESSION' --data-urlencode 'email=" + ATTACKER_EMAIL + "'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control — Cross-Site Request Forgery (CSRF)")
+        String content = TemplateEngine.vulnerabilityBadge("A01", "Broken Access Control — Cross-Site Request Forgery (CSRF)", "CSRF")
             + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("CSRF", content, true));
     }

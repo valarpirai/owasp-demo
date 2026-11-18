@@ -141,7 +141,7 @@ public class RceHandler implements IRouteHandler {
                         TemplateEngine.escape(safeResult) + "</pre>", true) : "")
             );
 
-        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — OS Command (RCE)") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A03", "Injection — OS Command (RCE)", "RCE") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Remote Code Execution", content, true));
     }
 }

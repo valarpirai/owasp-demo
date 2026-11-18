@@ -141,7 +141,7 @@ public class AuthFailuresHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/auth-failures/vulnerable -b 'JSESSIONID=SESSION' -d 'username=admin&password=admin123' | grep -o 'token.*</code>'"},
         });
 
-        String content = TemplateEngine.vulnerabilityBadge("A07", "Identification & Authentication Failures") + info + exploits + panels;
+        String content = TemplateEngine.vulnerabilityBadge("A07", "Identification & Authentication Failures", "Auth") + info + exploits + panels;
         res.getWriter().write(TemplateEngine.page("Auth Failures", content, true));
     }
 }

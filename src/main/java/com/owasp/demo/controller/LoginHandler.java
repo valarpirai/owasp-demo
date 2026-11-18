@@ -41,7 +41,13 @@ public class LoginHandler implements IRouteHandler {
         try {
             Optional<User> user = userRepository.findByUsernameAndPasswordSafe(username, password);
             if (user.isPresent()) {
-                HttpSession session = req.getSession(true);
+                HttpSession session = req.getSession(false);
+                if (session != null) {
+                    // New ID after login stops session fixation.
+                    req.changeSessionId();
+                } else {
+                    session = req.getSession(true);
+                }
                 session.setAttribute("user", user.get().username());
                 session.setAttribute("role", user.get().role());
                 res.sendRedirect("/");
@@ -53,13 +59,41 @@ public class LoginHandler implements IRouteHandler {
         }
     }
 
+    /**
+     * Builds one list row per user. Each row has a button that fills the login form.
+     * Passwords are shown on purpose. This is a local demo.
+     *
+     * @return list items HTML, or an empty string if the users cannot be read
+     */
+    private String userListHtml() {
+        try {
+            StringBuilder rows = new StringBuilder();
+            for (User u : userRepository.findAll()) {
+                rows.append("""
+                    <li class="flex items-center justify-between text-sm">
+                      <span><strong>%s</strong> <span class="text-gray-400">%s</span></span>
+                      <button type="button" data-user="%s" data-pass="%s"
+                        onclick="document.querySelector('[name=username]').value=this.dataset.user;document.querySelector('[name=password]').value=this.dataset.pass"
+                        class="border border-gray-300 rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-50">Use</button>
+                    </li>
+                    """.formatted(
+                        TemplateEngine.escape(u.username()), TemplateEngine.escape(u.role()),
+                        TemplateEngine.escape(u.username()), TemplateEngine.escape(u.password())));
+            }
+            return rows.toString();
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     private void renderLogin(HttpServletResponse res, String error) throws IOException {
         String errorHtml = error != null
             ? "<div class=\"mb-4 p-3 bg-red-100 text-red-700 rounded text-sm\">%s</div>".formatted(error)
             : "";
 
         String content = TemplateEngine.render("login.html", Map.of(
-            "error", errorHtml
+            "error", errorHtml,
+            "users", userListHtml()
         ));
 
         res.getWriter().write(TemplateEngine.page("Login", content, false));
