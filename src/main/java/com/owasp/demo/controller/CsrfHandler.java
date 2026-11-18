@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -104,33 +105,16 @@ public class CsrfHandler implements IRouteHandler {
             Messages.get("csrf.info.mitigation")
         );
 
-        String vulnForm = """
-            <p class="text-sm text-gray-700 mb-3">Current email: <strong>%s</strong></p>
-            <form method="POST" action="/csrf/vulnerable" class="space-y-3">
-              <input type="text" name="email" value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Change email (Vulnerable)</button>
-            </form>
-            <a href="/csrf/attack?target=vulnerable" target="_blank"
-               class="inline-block mt-3 text-sm text-red-700 underline">Open the attacker's page ↗</a>
-            """.formatted(
-                TemplateEngine.escape(emailOf(session, EMAIL_VULN)),
-                TemplateEngine.escape(emailOf(session, EMAIL_VULN)));
+        String vulnForm = TemplateEngine.render("forms/csrf-vulnerable.html", Map.of(
+            "email", TemplateEngine.escape(emailOf(session, EMAIL_VULN)),
+            "value", TemplateEngine.escape(emailOf(session, EMAIL_VULN))
+        ));
 
-        String safeForm = """
-            <p class="text-sm text-gray-700 mb-3">Current email: <strong>%s</strong></p>
-            <form method="POST" action="/csrf/mitigated" class="space-y-3">
-              <input type="hidden" name="csrfToken" value="%s"/>
-              <input type="text" name="email" value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Change email (Safe)</button>
-            </form>
-            <a href="/csrf/attack?target=mitigated" target="_blank"
-               class="inline-block mt-3 text-sm text-green-700 underline">Open the attacker's page ↗</a>
-            """.formatted(
-                TemplateEngine.escape(emailOf(session, EMAIL_SAFE)),
-                TemplateEngine.escape(tokenFor(session)),
-                TemplateEngine.escape(emailOf(session, EMAIL_SAFE)));
+        String safeForm = TemplateEngine.render("forms/csrf-mitigated.html", Map.of(
+            "email", TemplateEngine.escape(emailOf(session, EMAIL_SAFE)),
+            "token", TemplateEngine.escape(tokenFor(session)),
+            "value", TemplateEngine.escape(emailOf(session, EMAIL_SAFE))
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">

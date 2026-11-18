@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class XssHandler implements IRouteHandler {
 
@@ -42,41 +43,21 @@ public class XssHandler implements IRouteHandler {
 
         String xssPayload = "<script>alert('XSS')</script>";
 
-        String vulnForm = """
-            <form method="POST" action="/xss/vulnerable" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Post a comment</label>
-              <input type="text" name="comment"
-                placeholder='Try: %s'
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Submit (Vulnerable)</button>
-            </form>
-            %s
-            """.formatted(
-                TemplateEngine.escape(xssPayload),
-                TemplateEngine.escape(vulnInput != null ? vulnInput : ""),
-                vulnOutput != null
+        String vulnForm = TemplateEngine.render("forms/xss-vulnerable.html", Map.of(
+            "payload", TemplateEngine.escape(xssPayload),
+            "value", TemplateEngine.escape(vulnInput != null ? vulnInput : ""),
+            "output", vulnOutput != null
                     ? "<div class='mt-3 p-3 bg-red-50 border border-red-200 rounded text-sm'><strong>Rendered output:</strong><br/>" + vulnOutput + "</div>"
                     : ""
-            );
+        ));
 
-        String safeForm = """
-            <form method="POST" action="/xss/mitigated" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Post a comment</label>
-              <input type="text" name="comment2"
-                placeholder='Try: %s'
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Submit (Safe)</button>
-            </form>
-            %s
-            """.formatted(
-                TemplateEngine.escape(xssPayload),
-                TemplateEngine.escape(safeInput != null ? safeInput : ""),
-                safeOutput != null
+        String safeForm = TemplateEngine.render("forms/xss-mitigated.html", Map.of(
+            "payload", TemplateEngine.escape(xssPayload),
+            "value", TemplateEngine.escape(safeInput != null ? safeInput : ""),
+            "output", safeOutput != null
                     ? "<div class='mt-3 p-3 bg-green-50 border border-green-200 rounded text-sm'><strong>Rendered output (escaped):</strong><br/>" + safeOutput + "</div>"
                     : ""
-            );
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">

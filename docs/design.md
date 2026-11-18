@@ -188,4 +188,10 @@ Details read `user=… method=… path=… status=… params=…`. It lists para
 
 ## Templates
 
-`TemplateEngine` loads `.html` files from `resources/templates/` at runtime. It swaps `{key}` placeholders. The shell templates are `base.html`, `nav-auth.html`, `nav-public.html`, and `login.html`. Everything else — forms, tables, result boxes — is built as Java strings in the handlers.
+`TemplateEngine` loads `.html` files from `resources/templates/`. It swaps `{key}` placeholders in one pass, so user input that looks like `{other}` stays plain text.
+
+The shell templates are `base.html`, `nav-auth.html`, `nav-public.html`, and `login.html`. Each demo form lives in `templates/forms/<demo>-vulnerable.html` or `<demo>-mitigated.html`. Handlers pass only the dynamic values, already escaped.
+
+At startup the engine reads every file in `templates/forms/` into memory. It also keeps any other template after first use. Nothing is read from disk per request. It works from a classpath folder and from inside a jar.
+
+Result boxes, tables and the panel layout are still Java strings in the handlers.

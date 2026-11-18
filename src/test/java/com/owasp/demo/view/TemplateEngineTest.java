@@ -166,4 +166,31 @@ class TemplateEngineTest {
         assertTrue(html.contains("-u admin:admin123"));
         assertFalse(html.contains("SESSION_COOKIE"));
     }
+
+    @Test
+    void renderDoesNotRescanSubstitutedValues() {
+        String html = TemplateEngine.render("forms/csrf-mitigated.html", java.util.Map.of(
+            "email", "{token}", "token", "SECRET", "value", "v"));
+        assertTrue(html.contains("<strong>{token}</strong>"), "user text stays literal");
+        assertTrue(html.contains("value=\"SECRET\""));
+    }
+
+    @Test
+    void allFormsAreLoadedIntoMemoryAtStartup() {
+        var cached = TemplateEngine.cachedTemplates();
+        assertTrue(cached.contains("forms/sqli-vulnerable.html"));
+        assertTrue(cached.contains("forms/xss-mitigated.html"));
+        assertEquals(24, cached.stream().filter(n -> n.startsWith("forms/")).count());
+    }
+
+    @Test
+    void loadReturnsTheSameCachedText() {
+        assertSame(TemplateEngine.load("forms/csrf-vulnerable.html"), TemplateEngine.load("forms/csrf-vulnerable.html"));
+    }
+
+    @Test
+    void otherTemplatesAreCachedOnFirstUse() {
+        TemplateEngine.load("login.html");
+        assertTrue(TemplateEngine.cachedTemplates().contains("login.html"));
+    }
 }

@@ -1,0 +1,7 @@
+<form method="POST" action="/ssrf/vulnerable" class="space-y-3">
+  <label class="block text-sm font-medium text-gray-700">URL to fetch</label>
+  <input type="text" name="url" placeholder="https://example.com"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
+  <p class="text-xs text-gray-500">Try: <code>http://localhost:8080/</code> or <code>file:///etc/passwd</code></p>
+  <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Fetch (No Validation)</button>
+</form>

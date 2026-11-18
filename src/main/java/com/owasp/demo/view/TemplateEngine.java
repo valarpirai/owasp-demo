@@ -3,17 +3,52 @@ package com.owasp.demo.view;
 import com.owasp.demo.config.AppConfig;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TemplateEngine {
 
+    private static final String FORMS_DIR = "templates/forms";
+    private static final Map<String, String> CACHE = new ConcurrentHashMap<>();
+
+    static {
+        preloadForms();
+    }
+
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\{([A-Za-z0-9_-]+)\\}");
+
+    /**
+     * Fills {key} placeholders in one pass. Substituted values are never scanned
+     * again, so user input containing "{other}" stays as plain text. Unknown
+     * placeholders are left as they are.
+     *
+     * @param templateName file under templates/
+     * @param vars placeholder values by key
+     * @return the filled template
+     */
     public static String render(String templateName, Map<String, String> vars) {
         String tpl = load(templateName);
-        for (Map.Entry<String, String> e : vars.entrySet()) {
-            tpl = tpl.replace("{" + e.getKey() + "}", e.getValue() != null ? e.getValue() : "");
+        Matcher m = PLACEHOLDER.matcher(tpl);
+        StringBuilder out = new StringBuilder();
+        while (m.find()) {
+            String key = m.group(1);
+            String value = vars.containsKey(key) ? vars.get(key) : m.group();
+            m.appendReplacement(out, Matcher.quoteReplacement(value != null ? value : ""));
         }
-        return tpl;
+        m.appendTail(out);
+        return out.toString();
     }
 
     public static String page(String title, String content, boolean loggedIn) {
@@ -25,13 +60,61 @@ public class TemplateEngine {
         ));
     }
 
+    /**
+     * Returns a template from memory. Everything under templates/forms/ is read
+     * once at startup. Other templates are read on first use, then kept.
+     *
+     * @param name path under templates/, such as "forms/sqli-vulnerable.html"
+     * @return the template text
+     * @throws IllegalStateException if the template does not exist
+     */
     public static String load(String name) {
+        return CACHE.computeIfAbsent(name, TemplateEngine::readFromClasspath);
+    }
+
+    /**
+     * @return names of the templates held in memory, such as "forms/xss-mitigated.html"
+     */
+    public static Set<String> cachedTemplates() {
+        return Set.copyOf(CACHE.keySet());
+    }
+
+    private static String readFromClasspath(String name) {
         String path = "templates/" + name;
         try (InputStream in = TemplateEngine.class.getClassLoader().getResourceAsStream(path)) {
             if (in == null) throw new IllegalStateException("Template not found: " + path);
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load template: " + path, e);
+        }
+    }
+
+    /**
+     * Reads every .html file under templates/forms/ into the cache. Works for a
+     * plain classpath directory and for a directory inside a jar.
+     */
+    private static void preloadForms() {
+        try {
+            URL url = TemplateEngine.class.getClassLoader().getResource(FORMS_DIR);
+            if (url == null) throw new IllegalStateException("Template folder not found: " + FORMS_DIR);
+            URI uri = url.toURI();
+            if ("jar".equals(uri.getScheme())) {
+                try (FileSystem fs = FileSystems.newFileSystem(uri, Map.of())) {
+                    readForms(fs.getPath("/" + FORMS_DIR));
+                }
+            } else {
+                readForms(Path.of(uri));
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw new IllegalStateException("Failed to preload forms", e);
+        }
+    }
+
+    private static void readForms(Path dir) throws IOException {
+        try (Stream<Path> files = Files.list(dir)) {
+            for (Path f : (Iterable<Path>) files.filter(x -> x.toString().endsWith(".html"))::iterator) {
+                CACHE.put("forms/" + f.getFileName(), Files.readString(f, StandardCharsets.UTF_8));
+            }
         }
     }
 

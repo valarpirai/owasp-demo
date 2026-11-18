@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class SecurityMisconfigHandler implements IRouteHandler {
 
@@ -53,21 +54,13 @@ public class SecurityMisconfigHandler implements IRouteHandler {
             Messages.get("misconfig.info.mitigation")
         );
 
-        String vulnBtn = """
-            <a href="/misconfig/vulnerable"
-               class="inline-block bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">
-              Trigger Error (Verbose)
-            </a>
-            %s
-            """.formatted(vulnResult != null ? "<div class='mt-3'>" + vulnResult + "</div>" : "");
+        String vulnBtn = TemplateEngine.render("forms/misconfig-vulnerable.html", Map.of(
+            "result", vulnResult != null ? "<div class='mt-3'>" + vulnResult + "</div>" : ""
+        ));
 
-        String safeBtn = """
-            <a href="/misconfig/mitigated"
-               class="inline-block bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
-              Trigger Error (Safe)
-            </a>
-            %s
-            """.formatted(safeResult != null ? "<div class='mt-3'>" + safeResult + "</div>" : "");
+        String safeBtn = TemplateEngine.render("forms/misconfig-mitigated.html", Map.of(
+            "result", safeResult != null ? "<div class='mt-3'>" + safeResult + "</div>" : ""
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

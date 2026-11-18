@@ -1,0 +1,10 @@
+<form method="POST" action="/integrity/mitigated" class="space-y-3">
+  <label class="block text-sm font-medium text-gray-700">Base64 payload</label>
+  <input type="text" name="payload2" value="{payload}"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono text-xs"/>
+  <label class="block text-sm font-medium text-gray-700 mt-2">HMAC-SHA256 signature</label>
+  <input type="text" name="sig" value="{signature}"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono text-xs"/>
+  <p class="text-xs text-gray-500">Change payload without updating sig to see rejection.</p>
+  <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Submit (HMAC Verified)</button>
+</form>

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -151,28 +152,12 @@ public class SsrfHandler implements IRouteHandler {
             Messages.get("ssrf.info.mitigation")
         );
 
-        String vulnForm = """
-            <form method="POST" action="/ssrf/vulnerable" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">URL to fetch</label>
-              <input type="text" name="url" placeholder="https://example.com"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <p class="text-xs text-gray-500">Try: <code>http://localhost:8080/</code> or <code>file:///etc/passwd</code></p>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Fetch (No Validation)</button>
-            </form>
-            """;
+        String vulnForm = TemplateEngine.load("forms/ssrf-vulnerable.html");
 
-        String safeForm = """
-            <form method="POST" action="/ssrf/mitigated" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">URL to fetch</label>
-              <input type="text" name="url2" placeholder="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <p class="text-xs text-gray-500">Allowlist: <code>%s</code></p>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Fetch (Allowlist)</button>
-            </form>
-            """.formatted(
-                allowlist.isEmpty() ? "https://example.com" : allowlist.getFirst(),
-                TemplateEngine.escape(String.join(", ", allowlist))
-            );
+        String safeForm = TemplateEngine.render("forms/ssrf-mitigated.html", Map.of(
+            "placeholder", allowlist.isEmpty() ? "https://example.com" : allowlist.getFirst(),
+            "allowlist", TemplateEngine.escape(String.join(", ", allowlist))
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

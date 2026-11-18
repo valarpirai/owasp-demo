@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InsecureDesignHandler implements IRouteHandler {
@@ -72,23 +73,13 @@ public class InsecureDesignHandler implements IRouteHandler {
         String hint = "<p class='text-xs text-gray-500 mt-2'>Hint: the OTP is <code>123456</code>. " +
                       "In the vulnerable panel you can submit unlimited wrong guesses first.</p>";
 
-        String vulnForm = """
-            <form method="POST" action="/insecure-design/vulnerable" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Enter OTP</label>
-              <input type="text" name="otp" placeholder="6-digit code"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Submit (No Limit)</button>
-            </form>%s
-            """.formatted(hint);
+        String vulnForm = TemplateEngine.render("forms/insecure-design-vulnerable.html", Map.of(
+            "hint", hint
+        ));
 
-        String safeForm = """
-            <form method="POST" action="/insecure-design/mitigated" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Enter OTP</label>
-              <input type="text" name="otp2" placeholder="6-digit code"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Submit (Rate Limited)</button>
-            </form>%s
-            """.formatted(hint);
+        String safeForm = TemplateEngine.render("forms/insecure-design-mitigated.html", Map.of(
+            "hint", hint
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

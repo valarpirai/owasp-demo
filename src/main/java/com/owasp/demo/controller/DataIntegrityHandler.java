@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import javax.crypto.Mac;
@@ -96,28 +97,14 @@ public class DataIntegrityHandler implements IRouteHandler {
             sig = "error";
         }
 
-        String vulnForm = """
-            <form method="POST" action="/integrity/vulnerable" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Base64 payload</label>
-              <input type="text" name="payload" value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono text-xs"/>
-              <p class="text-xs text-gray-500">Modify the payload — server accepts anything.</p>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Submit (No Check)</button>
-            </form>
-            """.formatted(TemplateEngine.escape(sample));
+        String vulnForm = TemplateEngine.render("forms/integrity-vulnerable.html", Map.of(
+            "payload", TemplateEngine.escape(sample)
+        ));
 
-        String safeForm = """
-            <form method="POST" action="/integrity/mitigated" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Base64 payload</label>
-              <input type="text" name="payload2" value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono text-xs"/>
-              <label class="block text-sm font-medium text-gray-700 mt-2">HMAC-SHA256 signature</label>
-              <input type="text" name="sig" value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono text-xs"/>
-              <p class="text-xs text-gray-500">Change payload without updating sig to see rejection.</p>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Submit (HMAC Verified)</button>
-            </form>
-            """.formatted(TemplateEngine.escape(sample), TemplateEngine.escape(sig));
+        String safeForm = TemplateEngine.render("forms/integrity-mitigated.html", Map.of(
+            "payload", TemplateEngine.escape(sample),
+            "signature", TemplateEngine.escape(sig)
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

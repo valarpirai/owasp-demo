@@ -1,0 +1,8 @@
+<form method="POST" action="/rce/mitigated" class="space-y-3">
+  <label class="block text-sm font-medium text-gray-700">Hostname to ping</label>
+  <input type="text" name="host2" placeholder="e.g. localhost"
+    value="{value}"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono"/>
+  <p class="text-xs text-gray-500 mt-1">Only <code>[a-zA-Z0-9._-]</code> allowed — no shell metacharacters.</p>
+  <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Ping (Safe)</button>
+</form>

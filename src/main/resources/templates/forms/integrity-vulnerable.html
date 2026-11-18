@@ -1,0 +1,7 @@
+<form method="POST" action="/integrity/vulnerable" class="space-y-3">
+  <label class="block text-sm font-medium text-gray-700">Base64 payload</label>
+  <input type="text" name="payload" value="{payload}"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono text-xs"/>
+  <p class="text-xs text-gray-500">Modify the payload — server accepts anything.</p>
+  <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Submit (No Check)</button>
+</form>

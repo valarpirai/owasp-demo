@@ -31,13 +31,14 @@ Plain Java 21, no Spring. Single servlet (`AppServlet`) mapped to `/*` dispatche
 2. Register routes in `AppServlet`'s constructor.
 3. Add a card to the `cards:` list in `messages.yml`. Keep the list in OWASP ID order.
 4. Add the demo's title, badge (id, name, tag), info text and panel labels to `messages.yml`. Read them with `Messages.get("foo.title")`.
-5. Use `TemplateEngine.vulnerabilityBadge()`, `infoBox()`, and two `demoPanel()` calls — red for `/foo/vulnerable`, green for `/foo/mitigated`.
+5. Put each form in `templates/forms/foo-vulnerable.html` and `foo-mitigated.html`. Render it with `TemplateEngine.render("forms/…", Map.of(...))`.
+6. Use `TemplateEngine.vulnerabilityBadge()`, `infoBox()`, and two `demoPanel()` calls — red for `/foo/vulnerable`, green for `/foo/mitigated`.
 
 `RouteInterceptor` writes the audit row for you and `AuthInterceptor` enforces login (session cookie or Basic auth). Both run from `AppServlet` before and after each handler. Do not log demo requests in the handler. Settings go in `application.yml`, read with `AppConfig.get().getString("a.b")`. Full rules: `.claude/rules/new-demo.md`.
 
 ### Templates
 
-`TemplateEngine` loads `.html` files from `src/main/resources/templates/` via classloader. It replaces `{key}` placeholders. Shell structure lives in files. Forms and tables are Java strings in handlers.
+`TemplateEngine` loads `.html` files from `src/main/resources/templates/` via classloader and caches them. It replaces `{key}` placeholders in one pass. Shell structure lives in files. Each demo form lives in `templates/forms/<demo>-vulnerable.html` and `-mitigated.html`; the handler passes escaped values with `TemplateEngine.render()`. Tables and result boxes are Java strings in handlers.
 
 ### Tests
 

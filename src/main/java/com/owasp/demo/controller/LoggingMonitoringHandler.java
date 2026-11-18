@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,25 +75,9 @@ public class LoggingMonitoringHandler implements IRouteHandler {
             Messages.get("logging.info.mitigation")
         );
 
-        String vulnForm = """
-            <form method="POST" action="/logging/vulnerable" class="space-y-3">
-              <input type="text" name="username" placeholder="Username"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <input type="password" name="password" placeholder="Password"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Login (No Logging)</button>
-            </form>
-            """;
+        String vulnForm = TemplateEngine.load("forms/logging-vulnerable.html");
 
-        String safeForm = """
-            <form method="POST" action="/logging/mitigated" class="space-y-3">
-              <input type="text" name="username2" placeholder="Username"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <input type="password" name="password2" placeholder="Password"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Login (Logged)</button>
-            </form>
-            """;
+        String safeForm = TemplateEngine.load("forms/logging-mitigated.html");
 
         String auditTable = buildAuditTable();
 

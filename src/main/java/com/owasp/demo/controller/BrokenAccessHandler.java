@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.List;
 
 public class BrokenAccessHandler implements IRouteHandler {
@@ -89,22 +90,13 @@ public class BrokenAccessHandler implements IRouteHandler {
             Messages.get("bac.info.mitigation")
         );
 
-        String vulnBtn = """
-            <a href="/bac/vulnerable"
-               class="inline-block bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">
-              Fetch Admin Data (No Role Check)
-            </a>
-            %s
-            """.formatted(vulnResult != null ? "<div class='mt-3'>" + vulnResult + "</div>" : "");
+        String vulnBtn = TemplateEngine.render("forms/bac-vulnerable.html", Map.of(
+            "result", vulnResult != null ? "<div class='mt-3'>" + vulnResult + "</div>" : ""
+        ));
 
-        String safeBtn = """
-            <a href="/bac/mitigated"
-               class="inline-block bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">
-              Fetch Admin Data (Role Check)
-            </a>
-            <p class="text-xs text-gray-500 mt-1">Logged in as admin → access granted. Log in as 'user' to see the 403.</p>
-            %s
-            """.formatted(safeResult != null ? "<div class='mt-3'>" + safeResult + "</div>" : "");
+        String safeBtn = TemplateEngine.render("forms/bac-mitigated.html", Map.of(
+            "result", safeResult != null ? "<div class='mt-3'>" + safeResult + "</div>" : ""
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

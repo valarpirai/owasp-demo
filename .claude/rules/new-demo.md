@@ -20,6 +20,7 @@ Follow these rules for every new demo. `CsrfHandler` is the reference.
 
 - Put titles, tag, info text and panel labels in `messages.yml`. Read them with `Messages.get()`. No page text in Java.
 - Put settings in `application.yml`. Read them with `AppConfig.get()`.
+- Put each form in `templates/forms/<demo>-vulnerable.html` and `-mitigated.html`. Pass values with `TemplateEngine.render()`. Escape every value before you pass it. No form HTML in Java.
 - Build the page with `TemplateEngine`: `vulnerabilityBadge()`, `infoBox()`, `exploitBox()`.
 - Use two `demoPanel()` calls. Red is vulnerable. Green is mitigated.
 - Escape every user value with `TemplateEngine.escape()`. The vulnerable side may skip it only when the flaw is the missing escape.

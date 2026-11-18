@@ -1,0 +1,8 @@
+<p class="text-sm text-gray-700 mb-3">Current email: <strong>{email}</strong></p>
+<form method="POST" action="/csrf/vulnerable" class="space-y-3">
+  <input type="text" name="email" value="{value}"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
+  <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Change email (Vulnerable)</button>
+</form>
+<a href="/csrf/attack?target=vulnerable" target="_blank"
+   class="inline-block mt-3 text-sm text-red-700 underline">Open the attacker's page ↗</a>

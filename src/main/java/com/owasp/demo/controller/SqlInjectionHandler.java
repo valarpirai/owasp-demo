@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.List;
 
 public class SqlInjectionHandler implements IRouteHandler {
@@ -109,25 +110,13 @@ public class SqlInjectionHandler implements IRouteHandler {
              "curl -s -X POST http://localhost:8090/sqli/vulnerable -b 'SESSION_COOKIE=SESSION' --data-urlencode \"username=' AND 1=CONVERT(int,(SELECT TOP 1 password FROM users))--\""},
         });
 
-        String vulnForm = """
-            <form method="POST" action="/sqli/vulnerable" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Search username</label>
-              <input type="text" name="username" placeholder="e.g. admin' OR '1'='1"
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Run Vulnerable Query</button>
-            </form>
-            """.formatted(TemplateEngine.escape(vulnInput != null ? vulnInput : ""));
+        String vulnForm = TemplateEngine.render("forms/sqli-vulnerable.html", Map.of(
+            "value", TemplateEngine.escape(vulnInput != null ? vulnInput : "")
+        ));
 
-        String safeForm = """
-            <form method="POST" action="/sqli/mitigated" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Search username</label>
-              <input type="text" name="username2" placeholder="e.g. admin' OR '1'='1"
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Run Safe Query</button>
-            </form>
-            """.formatted(TemplateEngine.escape(safeInput != null ? safeInput : ""));
+        String safeForm = TemplateEngine.render("forms/sqli-mitigated.html", Map.of(
+            "value", TemplateEngine.escape(safeInput != null ? safeInput : "")
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

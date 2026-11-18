@@ -1,0 +1,9 @@
+<form method="POST" action="/xss/mitigated" class="space-y-3">
+  <label class="block text-sm font-medium text-gray-700">Post a comment</label>
+  <input type="text" name="comment2"
+    placeholder='Try: {payload}'
+    value="{value}"
+    class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
+  <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Submit (Safe)</button>
+</form>
+{output}

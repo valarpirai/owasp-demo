@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -96,25 +97,9 @@ public class AuthFailuresHandler implements IRouteHandler {
             Messages.get("auth-failures.info.mitigation")
         );
 
-        String vulnForm = """
-            <form method="POST" action="/auth-failures/vulnerable" class="space-y-3">
-              <input type="text" name="username" placeholder="Username"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <input type="password" name="password" placeholder="Password"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Login (Vulnerable)</button>
-            </form>
-            """;
+        String vulnForm = TemplateEngine.load("forms/auth-failures-vulnerable.html");
 
-        String safeForm = """
-            <form method="POST" action="/auth-failures/mitigated" class="space-y-3">
-              <input type="text" name="username2" placeholder="Username"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <input type="password" name="password2" placeholder="Password"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Login (Safe)</button>
-            </form>
-            """;
+        String safeForm = TemplateEngine.load("forms/auth-failures-mitigated.html");
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">%s%s</div>

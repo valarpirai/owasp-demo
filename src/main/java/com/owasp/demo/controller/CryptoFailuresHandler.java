@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -75,25 +76,13 @@ public class CryptoFailuresHandler implements IRouteHandler {
             Messages.get("crypto.info.mitigation")
         );
 
-        String vulnForm = """
-            <form method="POST" action="/crypto/vulnerable" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Enter a password to hash</label>
-              <input type="text" name="password" placeholder="e.g. hunter2"
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Hash with MD5</button>
-            </form>
-            """.formatted(TemplateEngine.escape(vulnInput != null ? vulnInput : ""));
+        String vulnForm = TemplateEngine.render("forms/crypto-vulnerable.html", Map.of(
+            "value", TemplateEngine.escape(vulnInput != null ? vulnInput : "")
+        ));
 
-        String safeForm = """
-            <form method="POST" action="/crypto/mitigated" class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Enter a password to hash</label>
-              <input type="text" name="password2" placeholder="e.g. hunter2"
-                value="%s"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"/>
-              <button class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Hash with Salt + SHA-256</button>
-            </form>
-            """.formatted(TemplateEngine.escape(safeInput != null ? safeInput : ""));
+        String safeForm = TemplateEngine.render("forms/crypto-mitigated.html", Map.of(
+            "value", TemplateEngine.escape(safeInput != null ? safeInput : "")
+        ));
 
         String panels = """
             <div class="grid md:grid-cols-2 gap-6">
